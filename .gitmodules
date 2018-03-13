@@ -1,0 +1,7 @@
+[submodule "themes/hugo-future-imperfect"]
+	path = themes/hugo-future-imperfect
+	url = https://github.com/jpescador/hugo-future-imperfect.git
+[submodule "public"]
+	path = public
+	url = https://github.com/focaaby/focaaby.github.io.git
+	branch = master

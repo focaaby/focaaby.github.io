@@ -1,5 +1,5 @@
 +++
-author = ""
+author = "Jerry Wang"
 categories = ["dotfiles", "bash", "zsh"]
 date = "2017-06-27"
 description = ""

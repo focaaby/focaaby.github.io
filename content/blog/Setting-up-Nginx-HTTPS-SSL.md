@@ -1,5 +1,5 @@
 +++
-author = ""
+author = "Jerry Wang"
 categories = ["ubuntu", "nginx", "ssl", "letsencrypt", "https"]
 date = "2017-08-02"
 description = ""

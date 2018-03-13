@@ -28,13 +28,13 @@ type = "post"
 
 建立一個目錄儲存 Git 資料
 
-```bash=
+```bash
 sudo mkdir -p /var/lib/gitea
 ```
 
 由於稍後會用 Ngnix docker 實作 reverse proxy，這邊先開始撰寫 `docker-compose`
 
-```=yaml
+```yaml
 version: "3"
 services:
   gitea:
@@ -57,7 +57,7 @@ services:
 
 新增一資料夾 `nginx`，主要放置 nginx 設定檔、virtual host 設定及 snippets。
 
-```
+```bash
 mkdir nginx
 mkdir nginx/conf.d      // site setting
 mkdir nginx/snippets
@@ -65,7 +65,7 @@ mkdir nginx/snippets
 
 新增 `gitea.conf` 至 `nginx/conf.d`，這邊要注意到 `gitea:3000`，主要藉由 docker compose 啟動時，會先將 container service 綁定到同一個 bridge networking 上。倘若 service 名稱有修改，對應名稱也必須修正。
 
-```
+```nginx
 upstream YOUR.DOMAIN {
     server gitea:3000;
 }
@@ -84,7 +84,7 @@ server {
 
 由於 `nginx:stable-alpine` 預設沒有 `proxy_params` 設定 proxy header，新增至 `nginx/snippets/proxy_params`
 
-```=nginx
+```nginx
 proxy_set_header Host $http_host;
 proxy_set_header X-Real-IP $remote_addr;
 proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -93,7 +93,7 @@ proxy_set_header X-Forwarded-Proto $scheme;
 
 修改 `docker-compose.yml` 加入 Nginx 部份，並刪除 gitea 對外的 10800 port。
 
-```
+```yaml
 version: "3"
 services:
   gitea:
@@ -118,7 +118,7 @@ services:
 
 安裝 [Certbot](https://certbot.eff.org/)
 
-```=bash
+```bash
 sudo apt-get update
 sudo apt-get install software-properties-common
 sudo add-apt-repository ppa:certbot/certbot
@@ -128,13 +128,13 @@ sudo apt-get install certbot
 
 申請 SSL 憑證
 
-```
+```bash
 sudo certbot certonly --standalone -d YOUR.DOMAIN
 ```
 
 撰寫 Ngnix SSL 憑證 header 設定 `nginx/snippets/ssl-params.conf`，方便未來 SSL 憑證都可以使用。
 
-```
+```nginx
 ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
 ssl_prefer_server_ciphers on;
 ssl_ciphers "EECDH+AESGCM:EDH+AESGCM:AES256+EECDH:AES256+EDH";
@@ -154,7 +154,7 @@ add_header X-Content-Type-Options nosniff;
 
 修改 `nginx/conf.d/gitea.conf`，預期 http（80）的都會移轉至 https（443）
 
-```
+```nginx
 upstream YOUR.DOMAIN {
 	server gitea:3000;
 }
@@ -186,7 +186,7 @@ server {
 
 記得將本機的 `/etc/letsencrypt` 相關設定掛載到 Nginx container，才能讀取到本機上的憑證，並開啟 443 port 對外開放。
 
-```
+```yaml
 version: "3"
 services:
   gitea:

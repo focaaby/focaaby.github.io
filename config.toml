@@ -26,7 +26,7 @@ canonifyURLs = true
   rssAppearAtTop       = true
   rssAppearAtBottom    = true
   # Sets Social Media icons to appear on the sidebar
-  socialAppearAtTop    = true
+  socialAppearAtTop    = false
   socialAppearAtBottom = true
   # Sets Categories to sort by number of posts instead of alphabetical
   categoriesByCount    = true
@@ -44,13 +44,13 @@ canonifyURLs = true
   socialShare          = true
   # Sets specific share to appear on posts (default behavior is to appear)
   socialShareTwitter   = true
-  socialShareGoogleplus = true
+  socialShareGoogleplus = false
   socialShareFacebook  = true
-  socialShareReddit    = true
-  socialShareLinkedin  = true
-  socialShareStumbleupon = true
-  socialSharePinterest = true
-  socialShareEmail     = true
+  socialShareReddit    = false
+  socialShareLinkedin  = false
+  socialShareStumbleupon = false
+  socialSharePinterest = false
+  socialShareEmail     = false
 
   # Load custom CSS or JavaScript files. The variable is an array so that you
   # can load multiple files if necessary. You can also load the standard theme
@@ -64,7 +64,7 @@ canonifyURLs = true
   disable_highlight = false # set to true to disable Highlight
   highlightjsVersion = "9.11.0"
   highlightjsCDN = "//cdn.bootcss.com"
-  highlightjsLang = ["r", "yaml", "css"]
+  highlightjsLang = ["bash", "json", "yaml", "css", "java", "javascript", "nginx"]
   highlightjsTheme = "github"
   MathJaxCDN = "//cdn.bootcss.com"
   MathJaxVersion = "2.7.1"

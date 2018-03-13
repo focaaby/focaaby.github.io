@@ -23,7 +23,7 @@ type = "post"
 
 - 目前的 Let’s Encrypt certbot 已經可以透過 PPA 來安裝。可以到 [certbot 官網](https://certbot.eff.org/) 勾選使用的 service 及 OS 則有對應的教學。如選擇 Nginx + Ubuntu 16.04
 
-```bash=
+```bash
 sudo apt-get update
 sudo apt-get install software-properties-common
 sudo add-apt-repository ppa:certbot/certbot
@@ -33,7 +33,7 @@ sudo apt-get install python-certbot-nginx
 
 - 多數寫成 `nginx snippets` 在 `.conf` 中去 include 即可以使用，也就不必在每個 conf 重複撰寫一樣的設定。[4, 5]
 
- ```nginx=
+ ```nginx
 ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
 ssl_prefer_server_ciphers on;
 ssl_ciphers "EECDH+AESGCM:EDH+AESGCM:AES256+EECDH:AES256+EDH";
@@ -54,13 +54,13 @@ ssl_dhparam /etc/ssl/certs/dhparam.pem;
 
 - certbot 無須逐站申請，可以透過以下 command 直接執行，會去檢查 你現在的 nginx 上目前有上線的站申請憑證
 
-```bash=
+```bash
 sudo certbot --nginx or // sudo certbot --nginx certonly
 ```
 
 # 整理後的設定檔
 
-```nginx=
+```nginx
 server {
 	listen 80;
 	listen [::]:80;
@@ -98,7 +98,7 @@ server {
 
 並且整理 joomla 及 php 的設定檔成 snippet
 
-```nginx=
+```nginx
 # joomla
 location / {
 	try_files $uri $uri/ /index.php?$args;

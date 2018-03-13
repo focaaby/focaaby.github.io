@@ -24,7 +24,7 @@ type = "post"
 
 在首頁就可以看到基本的安裝指令如下：
 
-```=bash
+```bash
 npm install hexo-cli -g
 hexo init blog
 cd blog
@@ -41,7 +41,7 @@ theme: Hacker
 接著，將 Hacker 主題 clone 或是直接 download 至 `themes` 路徑，並設定主題設定檔 `_config.yml`
 筆者在這邊已經先申請好 [Disqus](https://disqus.com/) 當作留言回覆，以及 [Google Analytics](https://www.google.com/analytics/) ID 了
 
-```=yaml
+```yaml
 # duoshuo comment
 duoshuo: false
 duoshuo_name:
@@ -60,7 +60,7 @@ googleTrackId:
 
 這裡 layout 預設有 `draft`，`page`，`post`三種，可自行新增 layout
 
-```=bash
+```bash
 hexo new [layout] <title>
 ```
 
@@ -68,13 +68,13 @@ hexo new [layout] <title>
 
 由於筆者會附上一些操作的截圖，Hexo 這邊提供了相關套件可以使用 `hexo-asset-image`
 
-```=bash
+```bash
 npm install hexo-asset-image // or yarn add hexo-asset-image
 ```
 
 安裝完套件以後，可以在全域設定檔 `_config.yml` 修改資產設定：
 
-```=yaml
+```yaml
 post_asset_folder: true
 ```
 設定完之後，在每次新增文章時，每一個文章名稱都會有一個同樣命名的資料夾路徑，便可以將該文章需要放置的 image、css、js 等檔案放置該目錄。

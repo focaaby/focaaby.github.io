@@ -23,7 +23,7 @@ type = "post"
 
 ### Ubuntu
 
-```=bash
+```bash
 sudo apt-get install software-properties-common
 sudo add-apt-repository -y ppa:ethereum/ethereum
 sudo apt-get update
@@ -32,7 +32,7 @@ sudo apt-get install ethereum
 
 ### macOS
 
-```=bash
+```bash
 brew tap ethereum/ethereum
 brew install ethereum
 ```
@@ -43,7 +43,7 @@ brew install ethereum
 
 建立一個 `genesis.json`
 
-```=json
+```json
 {
     "config": {
         "chainId": 15,
@@ -65,7 +65,7 @@ brew install ethereum
 
 ## geth 指令
 
-```=bash
+```bash
 geth --networkid 9487 \
      -rpc \
      --rpcaddr "0.0.0.0" \

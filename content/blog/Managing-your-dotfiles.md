@@ -25,7 +25,7 @@ type = "post"
 - `.bash_profile` or `.profile`
     在 Bash shell 環境中，是家目錄裡第一個被讀取的檔案，在這檔案通常裡都會去檢查你的當前 shell 並去執行（或是 `source`）：
 
-    ```bash=
+    dbash
     # if running bash
         if [ -n "$BASH_VERSION" ]; then
             # include .bashrc if it exists
@@ -33,7 +33,7 @@ type = "post"
                 . "$HOME/.bashrc"
             fi
         fi
-    ```
+    d
 
 - `.bashrc` or `.zshrc`
   根據你所使用的 shell 環境則會有不同的相關設定， macOS 及 Linux 環境中基本上都是使用 Bash shell，預設 `.bashrc` 會設定基本的顏色、alias 等，而我自己則是習慣使用 Z Shell 搭配 [Oh My Zsh](https://github.com/robbyrussell/oh-my-zsh)。

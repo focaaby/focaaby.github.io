@@ -52,10 +52,10 @@ type = "post"
 
 開機後，進入還原模式看到以下畫面後，點選命令提示字元並輸入上方第二點的方式則可以解決問題
 
-{{< img-post path="date" file="cmd.png" alt="cmd￼"  >}}
+{{< img-post path="date" file="cmd.jpg" alt="cmd￼"  >}}
 
 ## 後記
 
 漂亮的 Acer Swift 5，看的我也好想買新筆電了 XD
 
-{{< img-post path="date" file="swift5.png" alt="Swift5"  >}}
+{{< img-post path="date" file="swift5.jpg" alt="Swift5"  >}}

@@ -1,7 +1,7 @@
 +++
 author = "Jerry Wang"
 categories = ["ethereum", "blockchain"]
-date = "2018-03-18"
+date = "2018-03-08T15:57:07+08:00"
 description = "本文簡介如何透過 go-ethereum 專案來建制自己單節點的私有鏈"
 featured = ""
 featuredalt = ""
@@ -9,7 +9,6 @@ featuredpath = ""
 linktitle = ""
 title = "Setting up Ethereum private net in a single node"
 type = "post"
-
 +++
 
 # Ethereum 簡介
@@ -76,6 +75,7 @@ geth --networkid 9487 \
 ```
 
 console 參數：
+
 * networkid：如果連結多節點時，需要統一個 `networkid` 才能連線
 * rpc：開啟 HTTP-RPC server
 * rpcaddr：預設聽 `localhost`，要給外面連線 RPC。

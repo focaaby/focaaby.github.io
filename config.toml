@@ -117,22 +117,22 @@ canonifyURLs = true
   weight = 1
 
 [[menu.main]]
-  name = "About"
-  url = "/about/"
-  identifier = "fa fa-id-card-o"
-  weight = 2
-
-[[menu.main]]
   name = "Blog"
   url = "/blog/"
   identifier = "fa fa-newspaper-o"
-  weight = 3
+  weight = 2
 
 [[menu.main]]
   name = "Categories"
   url = "/categories/"
   identifier = "fa fa-sitemap"
-  weight = 4
+  weight = 3
+
+# [[menu.main]]
+#   name = "About"
+#   url = "/about/"
+#   identifier = "fa fa-id-card-o"
+#   weight = 2
 
 # [[menu.main]]
 #   name = "Itemized"

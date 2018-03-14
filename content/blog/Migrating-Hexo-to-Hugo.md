@@ -116,6 +116,21 @@ type = "post"
 
 因此需要將每篇除了內容之外，其餘 metadata 都需要更新。
 
+# Disqus 移轉
+
+Disqus 主控台提供 `Migration Tools`，筆者選擇 `Upload a URL map`，下方說明有一範例： `http://example.com/old-path/old/post.html > http://example.com/new-path/new/post.html`
+
+{{< img-post path="date" file="disqus-migrate.png" alt="disqus-migrate"  >}}
+
+所有文章中有被回應的是 [Acer Switf 5 安裝雙系統](https://focaaby.github.io/blog/windows-10-ubuntu-16-04-in-acer-swift-5/)（~~趁機廣告~~），提供的 csv 檔案如
+
+```csv
+https://focaaby.github.io/2017/05/09/Windows-10-ubuntu-16-04-in-Acer-Swift-5/, https://focaaby.github.io/blog/windows-10-ubuntu-16-04-in-acer-swift-5/
+```
+
+最後上傳至 Disqus 主控台就完成囉～
+
+
 # 簡易比較
 
 ## 速度

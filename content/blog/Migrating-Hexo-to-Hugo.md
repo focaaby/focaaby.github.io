@@ -1,6 +1,6 @@
 +++
 author = "Jerry Wang"
-categories = [""]
+categories = ["hexo", "hugo"]
 date = "2018-03-13"
 description = "本文利用 Hugo 建立靜態網站，並簡易比較 Hexo 與 Hugo 的差異。"
 featured = ""

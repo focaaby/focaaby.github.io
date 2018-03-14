@@ -96,7 +96,7 @@ date:
 ---
 ```
 
-Hugo 主題 Markdown，多了客製化 SEO 及呈現每篇文章內容部份
+Hugo 預設格式也跟 Hexo 雷同，不過筆者所選擇的 [hugo-future-imperfect](https://github.com/jpescador/hugo-future-imperfect) 主題，多了客製化 SEO 及呈現每篇文章內容部份
 
 ```markdown
 +++

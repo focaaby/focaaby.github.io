@@ -1,7 +1,4 @@
-language: go
-
-go:
-  - "1.10"
+language: generic
 
 before_install:
   - sudo apt-get install snapd -y

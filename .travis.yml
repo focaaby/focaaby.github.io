@@ -5,7 +5,7 @@ go:
 
 before_install:
   - sudo apt-get install snapd -y
-  - sudo snap install hugo -y
+  - sudo snap install hugo
 
 install:
   - hugo -t hugo-future-imperfect

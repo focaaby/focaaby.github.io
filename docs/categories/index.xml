@@ -1,0 +1,348 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Categories on focaaby&#39;s Note</title>
+    <link>/categories/</link>
+    <description>Recent content in Categories on focaaby&#39;s Note</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Tue, 28 Nov 2017 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="/categories/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Algorithm</title>
+      <link>/categories/algorithm/</link>
+      <pubDate>Tue, 28 Nov 2017 00:00:00 +0000</pubDate>
+      
+      <guid>/categories/algorithm/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Apparmor</title>
+      <link>/categories/apparmor/</link>
+      <pubDate>Sat, 31 Mar 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/categories/apparmor/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Bash</title>
+      <link>/categories/bash/</link>
+      <pubDate>Tue, 27 Jun 2017 00:00:00 +0000</pubDate>
+      
+      <guid>/categories/bash/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Bind</title>
+      <link>/categories/bind/</link>
+      <pubDate>Sun, 25 Mar 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/categories/bind/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Blockchain</title>
+      <link>/categories/blockchain/</link>
+      <pubDate>Thu, 08 Mar 2018 15:57:07 +0800</pubDate>
+      
+      <guid>/categories/blockchain/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Certbot</title>
+      <link>/categories/certbot/</link>
+      <pubDate>Sun, 25 Mar 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/categories/certbot/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Conf</title>
+      <link>/categories/conf/</link>
+      <pubDate>Fri, 08 Sep 2017 00:00:00 +0000</pubDate>
+      
+      <guid>/categories/conf/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Css</title>
+      <link>/categories/css/</link>
+      <pubDate>Mon, 16 Oct 2017 00:00:00 +0000</pubDate>
+      
+      <guid>/categories/css/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Devops</title>
+      <link>/categories/devops/</link>
+      <pubDate>Fri, 08 Sep 2017 00:00:00 +0000</pubDate>
+      
+      <guid>/categories/devops/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Distributed-system</title>
+      <link>/categories/distributed-system/</link>
+      <pubDate>Tue, 28 Nov 2017 00:00:00 +0000</pubDate>
+      
+      <guid>/categories/distributed-system/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Docker</title>
+      <link>/categories/docker/</link>
+      <pubDate>Sun, 22 Oct 2017 00:00:00 +0000</pubDate>
+      
+      <guid>/categories/docker/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Dotfiles</title>
+      <link>/categories/dotfiles/</link>
+      <pubDate>Tue, 27 Jun 2017 00:00:00 +0000</pubDate>
+      
+      <guid>/categories/dotfiles/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Dualboot</title>
+      <link>/categories/dualboot/</link>
+      <pubDate>Tue, 09 May 2017 00:00:00 +0000</pubDate>
+      
+      <guid>/categories/dualboot/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Elasticsearch</title>
+      <link>/categories/elasticsearch/</link>
+      <pubDate>Tue, 10 Apr 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/categories/elasticsearch/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Ethereum</title>
+      <link>/categories/ethereum/</link>
+      <pubDate>Thu, 08 Mar 2018 15:57:07 +0800</pubDate>
+      
+      <guid>/categories/ethereum/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Gitea</title>
+      <link>/categories/gitea/</link>
+      <pubDate>Sun, 22 Oct 2017 00:00:00 +0000</pubDate>
+      
+      <guid>/categories/gitea/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Github</title>
+      <link>/categories/github/</link>
+      <pubDate>Thu, 21 Dec 2017 00:00:00 +0000</pubDate>
+      
+      <guid>/categories/github/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Hexo</title>
+      <link>/categories/hexo/</link>
+      <pubDate>Tue, 13 Mar 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/categories/hexo/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Https</title>
+      <link>/categories/https/</link>
+      <pubDate>Wed, 02 Aug 2017 00:00:00 +0000</pubDate>
+      
+      <guid>/categories/https/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Hugo</title>
+      <link>/categories/hugo/</link>
+      <pubDate>Tue, 13 Mar 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/categories/hugo/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Kibana</title>
+      <link>/categories/kibana/</link>
+      <pubDate>Tue, 10 Apr 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/categories/kibana/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Letsencrypt</title>
+      <link>/categories/letsencrypt/</link>
+      <pubDate>Sun, 25 Mar 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/categories/letsencrypt/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Logstash</title>
+      <link>/categories/logstash/</link>
+      <pubDate>Tue, 10 Apr 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/categories/logstash/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Mariadb</title>
+      <link>/categories/mariadb/</link>
+      <pubDate>Sat, 31 Mar 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/categories/mariadb/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Mysql</title>
+      <link>/categories/mysql/</link>
+      <pubDate>Sat, 31 Mar 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/categories/mysql/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Network</title>
+      <link>/categories/network/</link>
+      <pubDate>Tue, 09 May 2017 00:00:00 +0000</pubDate>
+      
+      <guid>/categories/network/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Nginx</title>
+      <link>/categories/nginx/</link>
+      <pubDate>Sun, 22 Oct 2017 00:00:00 +0000</pubDate>
+      
+      <guid>/categories/nginx/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Nodejs</title>
+      <link>/categories/nodejs/</link>
+      <pubDate>Thu, 11 May 2017 00:00:00 +0000</pubDate>
+      
+      <guid>/categories/nodejs/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Raft</title>
+      <link>/categories/raft/</link>
+      <pubDate>Tue, 28 Nov 2017 00:00:00 +0000</pubDate>
+      
+      <guid>/categories/raft/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Ssl</title>
+      <link>/categories/ssl/</link>
+      <pubDate>Wed, 02 Aug 2017 00:00:00 +0000</pubDate>
+      
+      <guid>/categories/ssl/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Travis-ci</title>
+      <link>/categories/travis-ci/</link>
+      <pubDate>Thu, 21 Dec 2017 00:00:00 +0000</pubDate>
+      
+      <guid>/categories/travis-ci/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Ubuntu</title>
+      <link>/categories/ubuntu/</link>
+      <pubDate>Wed, 02 Aug 2017 00:00:00 +0000</pubDate>
+      
+      <guid>/categories/ubuntu/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Uefi</title>
+      <link>/categories/uefi/</link>
+      <pubDate>Tue, 09 May 2017 00:00:00 +0000</pubDate>
+      
+      <guid>/categories/uefi/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Virtualbox</title>
+      <link>/categories/virtualbox/</link>
+      <pubDate>Tue, 09 May 2017 00:00:00 +0000</pubDate>
+      
+      <guid>/categories/virtualbox/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Vue</title>
+      <link>/categories/vue/</link>
+      <pubDate>Thu, 21 Dec 2017 00:00:00 +0000</pubDate>
+      
+      <guid>/categories/vue/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Windows</title>
+      <link>/categories/windows/</link>
+      <pubDate>Tue, 09 May 2017 00:00:00 +0000</pubDate>
+      
+      <guid>/categories/windows/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Zsh</title>
+      <link>/categories/zsh/</link>
+      <pubDate>Tue, 27 Jun 2017 00:00:00 +0000</pubDate>
+      
+      <guid>/categories/zsh/</guid>
+      <description></description>
+    </item>
+    
+  </channel>
+</rss>

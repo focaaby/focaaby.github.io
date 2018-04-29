@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Hugo on focaaby&#39;s Note</title>
+    <link>/categories/hugo/</link>
+    <description>Recent content in Hugo on focaaby&#39;s Note</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Tue, 13 Mar 2018 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="/categories/hugo/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Migrating Hexo to Hugo</title>
+      <link>/blog/migrating-hexo-to-hugo/</link>
+      <pubDate>Tue, 13 Mar 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/blog/migrating-hexo-to-hugo/</guid>
+      <description>前言 由於 Hexo 多少在部屬時會發生不可預期的錯誤，相關模組有些也逐漸停止更新，除了最近也開始研究 golang 之外，也發現 Hugo 在 GitHub 星星數竟然已經超越 Hexo 了，因此來試試號稱世界最快的靜態網頁生產框架。
+動手做 安裝 Hugo 由於 Hugo 是由 golang 編譯而成，因此我們只需要安裝編譯好的 binaray 檔案，這邊為了未來升級方便，皆使用套件管理進行安裝。
+brew install hugo // macOS snap install hugo // Ubuntu or apt install hugo  建立新的網站 hugo install site blog //資料夾名稱為 blog cd blog git init git submodule add https://github.com/jpescador/hugo-future-imperfect.git themes/hugo-future-imperfect // 可以選擇自己喜歡的主題  主題 筆者原先想說說不定也有人移植 Hexo Next 主題，不過沒關係官網也有整理彙整主題頁面 Hugo Theme 選用 hugo-future-imperfect，主要原因是此主題有優化滿多 SEO 的部份，圖片管理及社群分享都比較符合筆者的期許。
+主題說明可以知道目錄結構如下，複製 theme/hugo-future-imperfect/exampleSite 即可，不過筆者不會使用到 staticman 因此沒有複製 staticman.</description>
+    </item>
+    
+  </channel>
+</rss>

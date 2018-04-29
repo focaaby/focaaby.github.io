@@ -1,0 +1,250 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Blog on focaaby&#39;s Note</title>
+    <link>/blog/</link>
+    <description>Recent content in Blog on focaaby&#39;s Note</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Tue, 10 Apr 2018 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="/blog/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Managing Nginx log via Docker ELK Stack</title>
+      <link>/blog/managing-nginx-log-via-docker-elk-stack/</link>
+      <pubDate>Tue, 10 Apr 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/blog/managing-nginx-log-via-docker-elk-stack/</guid>
+      <description>前因 經常在 DevOps TW 看到分析管理 log 有那些套件可以使用，傳統來說彙整 log 會使用 RSYSLOG，而筆者想要嘗試的則是近幾年興起應用於 big data 的圖表分析 Elasticsearch + Logstash + Kibana，取每個元件字首簡稱 ELK Stack。
+選用原因 主要筆者的環境需要將簡單將 syslog 或 Nginx acess_log 日誌檔案做基本處理，且具有 buffer 功能。 而 Logstash 就是具有以上功能並有 pipeline 分成三階段（inputs → filters → outputs）的概念：
+ input：接受檔案、syslog（符合 RFC3164 標準）或像 Redis broker 當作輸入來源。 filter：grok 相似正規表示法，但較方便於將 log file 處理成想要的格式。 ouput：經過 filter 處理過的資料，輸出結果多樣。如：檔案、Elatcsearch、statsd 等。  動手做 筆者習慣利用 docker 來架設測試環境，當然也有已經整理好的 Docker ELK stack Github repo
+啟用 ELK Stack git clone https://github.</description>
+    </item>
+    
+    <item>
+      <title>After Migrating MySQL to MariaDB, AppArmor blocks MariaDB</title>
+      <link>/blog/after-migrating-mysql-to-mariadb/</link>
+      <pubDate>Sat, 31 Mar 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/blog/after-migrating-mysql-to-mariadb/</guid>
+      <description>前言 繼上篇移轉 MySQL 至 MariaDB 成功後都尚未重開伺服器過，重起之後發現 DB 持續無法正常開始運作。
+檢查 log MariaDB 的 error log 於 syslog。
+cat /var/log/syslog.1 | grep mysql  找到錯誤部分
+Mar 30 17:24:51 host mysqld[1274]: Version: &#39;10.2.14-MariaDB-10.2.14+maria~xenial-log&#39; socket: &#39;/var/run/mysqld/mysqld.sock&#39; port: 3306 mariadb.org binary distribution Mar 30 17:24:51 host kernel: [ 28.492966] audit: type=1400 audit(1522401891.184:11): apparmor=&amp;quot;DENIED&amp;quot; operation=&amp;quot;sendmsg&amp;quot; info=&amp;quot;Failed name lookup - disconnected path&amp;quot; error=-13 profile=&amp;quot;/usr/sbin/mysqld&amp;quot; name=&amp;quot;run/systemd/notify&amp;quot; pid=1274 comm=&amp;quot;mysqld&amp;quot; requested_mask=&amp;quot;w&amp;quot; denied_mask=&amp;quot;w&amp;quot; fsuid=105 ouid=0 Mar 30 17:25:24 host mysqld[1274]: 2018-03-30 17:25:24 139927115249408 [Note] InnoDB: Buffer pool(s) load completed at 180330 17:25:24 Mar 30 17:26:11 host mysqld[1274]: 2018-03-30 17:26:11 139928163120896 [Note] /usr/sbin/mysqld (initiated by: unknown): Normal shutdown Mar 30 17:26:11 host mysqld[1274]: 2018-03-30 17:26:11 139928163120896 [Note] Event Scheduler: Purging the queue.</description>
+    </item>
+    
+    <item>
+      <title>Create Let&#39;s Encrypt Wildcard Certificate With BIND</title>
+      <link>/blog/create-lets-encrypt-wildcard-certificate-with-nginx/</link>
+      <pubDate>Sun, 25 Mar 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/blog/create-lets-encrypt-wildcard-certificate-with-nginx/</guid>
+      <description>前言 去年暑假 Let&amp;rsquo;s Encrypt 公告了 2018 年將會提供 Wildcard Certificate，不過有一些些的小遲到了會～本篇將會介紹如何利用 certbot 來申請 Let&amp;rsquo;s Encrypt Wildcard Certificate。
+動手做 在開始之前先確定 certbot 版本，Wildcard 功能是在 0.22 之後才能使用的
+certbot --version certbot 0.22.2  指令 sudo certbot certonly --manual -d *.example.com --agree-tos --manual-public-ip-logging-ok --preferred-challenges dns-01 --server https://acme-v02.api.letsencrypt.org/directory  輸入你的信箱
+Saving debug log to /var/log/letsencrypt/letsencrypt.log Plugins selected: Authenticator manual, Installer None Enter email address (used for urgent renewal and security notices) (Enter &#39;c&#39; to cancel): example@gmail.com  修改 DNS 伺服器設定 TXT 紀錄</description>
+    </item>
+    
+    <item>
+      <title>Migrating MySQL 5.7 to MariaDB 10.2</title>
+      <link>/blog/migrating-mysql-2-mariadb/</link>
+      <pubDate>Mon, 19 Mar 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/blog/migrating-mysql-2-mariadb/</guid>
+      <description>記錄一下把 MySQL 移植更新至 MariaDB 10.2
+動手做 備份 先備份所有的資料及設定黨
+ mysqldump -u &amp;lt;user&amp;gt; -p --all-databases &amp;gt; all_databases.sql 備份 /var/lib/mysql 備份 /etc/mysql 的設定檔  刪除 MySQL 務必確定備份好資料後，再進行接下來的動作否則造成災難
+ 刪除 /var/lib/mysql 資料夾 sudo apt remove mysql mysql-server mysql-common  安裝 MariaDB 10.2 sudo apt-get install software-properties-common sudo apt-key adv --recv-keys --keyserver hkp://keyserver.ubuntu.com:80 0xF1656F24C74CD1D8 sudo add-apt-repository &#39;deb [arch=amd64,i386,ppc64el] http://ftp.ubuntu-tw.org/mirror/mariadb/repo/10.2/ubuntu xenial main&#39; sudo apt update sudo apt install mariadb-server  mysql_upgrade 將原本資料還原到 MariaDB
+mysql -u &amp;lt;user&amp;gt; -p &amp;lt; all_databases.</description>
+    </item>
+    
+    <item>
+      <title>Migrating Hexo to Hugo</title>
+      <link>/blog/migrating-hexo-to-hugo/</link>
+      <pubDate>Tue, 13 Mar 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/blog/migrating-hexo-to-hugo/</guid>
+      <description>前言 由於 Hexo 多少在部屬時會發生不可預期的錯誤，相關模組有些也逐漸停止更新，除了最近也開始研究 golang 之外，也發現 Hugo 在 GitHub 星星數竟然已經超越 Hexo 了，因此來試試號稱世界最快的靜態網頁生產框架。
+動手做 安裝 Hugo 由於 Hugo 是由 golang 編譯而成，因此我們只需要安裝編譯好的 binaray 檔案，這邊為了未來升級方便，皆使用套件管理進行安裝。
+brew install hugo // macOS snap install hugo // Ubuntu or apt install hugo  建立新的網站 hugo install site blog //資料夾名稱為 blog cd blog git init git submodule add https://github.com/jpescador/hugo-future-imperfect.git themes/hugo-future-imperfect // 可以選擇自己喜歡的主題  主題 筆者原先想說說不定也有人移植 Hexo Next 主題，不過沒關係官網也有整理彙整主題頁面 Hugo Theme 選用 hugo-future-imperfect，主要原因是此主題有優化滿多 SEO 的部份，圖片管理及社群分享都比較符合筆者的期許。
+主題說明可以知道目錄結構如下，複製 theme/hugo-future-imperfect/exampleSite 即可，不過筆者不會使用到 staticman 因此沒有複製 staticman.</description>
+    </item>
+    
+    <item>
+      <title>Setting up Ethereum private net in a single node</title>
+      <link>/blog/ethereum-private-net-in-a-single-node/</link>
+      <pubDate>Thu, 08 Mar 2018 15:57:07 +0800</pubDate>
+      
+      <guid>/blog/ethereum-private-net-in-a-single-node/</guid>
+      <description>Ethereum 簡介 一個 Open source 的專案，最具著名的就是用有圖靈完備語法的智能合約。
+動手做 在 Ethereum Homestead 有提到許多種的 client 可以使用，筆者挑選目前較多人使用的 go-ethereum。
+安裝 Ethereum Ubuntu sudo apt-get install software-properties-common sudo add-apt-repository -y ppa:ethereum/ethereum sudo apt-get update sudo apt-get install ethereum  macOS brew tap ethereum/ethereum brew install ethereum  創始區塊 在每個區塊鏈都必須有一個創始區塊，而本範例是透過 go-ethereum 建立私有鏈，而非連上 Ethereum 的主鏈。
+建立一個 genesis.json
+{ &amp;quot;config&amp;quot;: { &amp;quot;chainId&amp;quot;: 15, &amp;quot;homesteadBlock&amp;quot;: 0, &amp;quot;eip155Block&amp;quot;: 0, &amp;quot;eip158Block&amp;quot;: 0 }, &amp;quot;difficulty&amp;quot;: &amp;quot;200000000&amp;quot;, &amp;quot;gasLimit&amp;quot;: &amp;quot;2100000&amp;quot;, &amp;quot;alloc&amp;quot;: { &amp;quot;7df9a875a174b3bc565e6424a0050ebc1b2d1d82&amp;quot;: { &amp;quot;balance&amp;quot;: &amp;quot;300000&amp;quot; }, &amp;quot;f41c74c9ae680c1aa78f42e5647a62f353b7bdde&amp;quot;: { &amp;quot;balance&amp;quot;: &amp;quot;400000&amp;quot; } } }  透過 geth init genesis.</description>
+    </item>
+    
+    <item>
+      <title>Build Vue project with Travis CI on GitHub Pages</title>
+      <link>/blog/build-vue-project-with-travis-ci-on-github-pages/</link>
+      <pubDate>Thu, 21 Dec 2017 00:00:00 +0000</pubDate>
+      
+      <guid>/blog/build-vue-project-with-travis-ci-on-github-pages/</guid>
+      <description>前言 Travis.ci 主要於 GitHub 上時常使用到的持續整合工具，也支援了非常多程式語言，如 Node.js, PHP, Java, C, Golang&amp;hellip;等。這次 slide project 透過 vue-cli 了一個小專案，但是每次都必須手動 push 至 GitHub Pages 覺得有點小困擾，本篇透過 Travis 支援 Open Source 專案方式，設置自動部屬於到專案頁面上。
+建立專案 vue-cli 建立 vue 專案，使用的是 webpack 設定檔
+vue init webpack ebook-search  GitHub 設定 Personal access tokens 因為必須透過第三方授權讓 Travis 上傳更新 repo，所以必須到設定裡面的 Developer settings &amp;gt; Personal access tokens 新增一個應用程式。
+ 取得後的 token 切記保密，請勿上傳至公開頁面，如果有洩漏後，可以至設定頁面重新產一組新的 token。  
+設定 Travis Dashboard 到 https://travis-ci.org/ ，可以透過 Github 帳號登入並啟用專案
+ Travis CI .</description>
+    </item>
+    
+    <item>
+      <title>Raft algorithm(1)</title>
+      <link>/blog/raft-algorithm-1/</link>
+      <pubDate>Tue, 28 Nov 2017 00:00:00 +0000</pubDate>
+      
+      <guid>/blog/raft-algorithm-1/</guid>
+      <description>前言 在嘗試事做分散式的架構時，原則上在多台機器同時需要處理一件事情的時候，但是多台機器必須知道這項事情是否被處理、紀錄等，舉例： 若有 message queue（後簡稱 MQ）架設成叢集式架構，那如何讓不同的機器保持有一樣 MQ 順序不亂，機器間溝通就需要有「共識」，讓每個人來拿的都是同一個順序。
+什麼是 Raft Raft 是一容易理解的共識演算法，具有與 Paxos 演算法相當的容錯與效能。
+何謂「共識」？ 分散式系統容錯中十分重要的問題，包含了多台伺服器同意數值的改變。傳統的共識演算法需要過多數決（magority）來進行共識，舉例來說：一個 5 台伺服器叢集系統，可以允許在兩台伺服器當機，而其餘伺服器持續運作；倘若有更多台伺服器當機，就會停止運作。
+第一章節：介紹 將近十年來多數共識演算法都是基於 Paxos 或是受它影響，也就成為主流教導學生的題材。很不幸運的事 Paxos 演算法並不是那麼容易理解，需要更複雜的架構來實作系統。
+Raft 設計理念為「非常容易理解（understandability）」的共識演算法。
+分別在兩間學校找了 43 個學生來實驗：學習兩種不同的演算法，其中 33 名學生有能力回答 Raft 演算法問題比 Paxos 演算法來的更好。
+儘管 Raft 與許多既有的共識演算法類似，以下是幾個新穎的特色：
+ String leader：Raft 使用了比較強的領導權。舉例： 其他的伺服器 log entries 僅來自於 leader。 Leader election：Raft 使用隨機倒數計時來選 leader，對於任一共識演算法而言也僅增加一小部分既有的 heartbeats，可以解決衝突更簡單快速。 Membership changes：Raft 在變更機器數量時，會新增一個 joint consensus ，來解決兩個不同的設定重疊問題。設定變化時，叢集仍可繼續正常運作。  之後章節的簡介：
+ 第二章節：replicated state machine problem 第三章節：討論 strengths 和 weakness of Paxos 第四章節：描述如何達到「容易理解性」 第五～八章節：闡述 Raft 共事演算法 第九章節：如何評估 Raft 第十章節：相關文獻  小結語 先前稍微研究了 Zookeeper 的演算法，目前覺得看起來重複性也是滿高的，應該有許多細節是尚未釐清，但是也沒有看過 Paxos 演算法，得花點時間了解一下了。</description>
+    </item>
+    
+    <item>
+      <title>Gitea with Nginx Reverse Proxy</title>
+      <link>/blog/gitea-with-nginx-reverse-proxy/</link>
+      <pubDate>Sun, 22 Oct 2017 00:00:00 +0000</pubDate>
+      
+      <guid>/blog/gitea-with-nginx-reverse-proxy/</guid>
+      <description>前言 先前在 DevOps Taipei 2017 有注意到有前輩在推廣 Gitea，因為個人也有些私人需求而來研究一下如何架設。
+本篇可知道：
+ 如何用 Docker 架設 Gitea server 利用 Nginx docker 設定 reverse proxy Let&amp;rsquo;s Encrypt 綁定 reverse proxy  開始安裝 Gitea 建立一個目錄儲存 Git 資料
+sudo mkdir -p /var/lib/gitea  由於稍後會用 Ngnix docker 實作 reverse proxy，這邊先開始撰寫 docker-compose
+version: &amp;quot;3&amp;quot; services: gitea: image: gitea/gitea:latest ports: - &amp;quot;10022:22&amp;quot; - &amp;quot;10080:3000&amp;quot; volumes: - /var/lib/gitea:/data container_name: gitea  docker-compose up -d 將 Gitea container 啟用後，瀏覽器開啟 http://hostname:10080 可以看到以下設定頁面</description>
+    </item>
+    
+    <item>
+      <title>CSS Tricks(1) - pseudo css elements after and before</title>
+      <link>/blog/css-tricks-1/</link>
+      <pubDate>Mon, 16 Oct 2017 00:00:00 +0000</pubDate>
+      
+      <guid>/blog/css-tricks-1/</guid>
+      <description>前言 最近接了一個 case 主要後台使用 ePage。稍微翻了一些資料，主要時空背景還是在十年前的時候，儘管可以自訂公告、相簿等模組，但是許多預設的 DOM 物件都無法做修改， 必須透過 CSS 方式去強制修改一些位置，因此也學習到了不少東西，預計會分好幾篇來紀錄。
+使用情境 在許多「連結」前面，多數為了要講究美或整齊，多半都會加入一些小 icon 來提醒使用者來快速找到對應的連結，在能自己修改 html 的情況下，都會加入類似 Font Awesome &amp;lt;i class=&amp;quot;menu-item-icon fa fa-fw fa-archive&amp;quot;&amp;gt;&amp;lt;/i&amp;gt; 寫法，本篇使用了 pseudo element 方式實作。
+pseudo - before &amp;amp; after 在 CSS pseudo element 中最常使用到的 ::after 及 ::before，允許你在該 DOM 物件裡加入一些內容，像是字串、圖片等。
+加入字串 See the Pen pseudo - before &amp;amp; after(1) by Jerry Wang (@focaaby) on CodePen.
+
+加入圖片 See the Pen pseudo - before &amp;amp; after(2) by Jerry Wang (@focaaby) on CodePen.</description>
+    </item>
+    
+    <item>
+      <title>CSS Tricks(2) - 3 kinds of border</title>
+      <link>/blog/css-tricks-2/</link>
+      <pubDate>Mon, 16 Oct 2017 00:00:00 +0000</pubDate>
+      
+      <guid>/blog/css-tricks-2/</guid>
+      <description>使用情境  navbar 的 hover 效果 在 banner titile 字體的設計 table 中客製化 border  解法 方法 1 直觀想法，直接 border-bottom 加上去。
+See the Pen border bottom(1) by Jerry Wang (@focaaby) on CodePen.
+
+方法 2 由於方法 1 不能「在不影響原內容 padding, margin」來調整 border 的長度及 box 距離。
+利用 position 先將父元素 &amp;lt;h1&amp;gt; 設定為 relative， ::after 設定為 absolute 再透過 left, bottom 設定相對位置。
+See the Pen border bottom(2) by Jerry Wang (@focaaby) on CodePen.
+
+組合技 border-bottom 幫 td 上底線，用 ::before 客製化兩兩 td 中間的線匡。</description>
+    </item>
+    
+    <item>
+      <title>DevOpsDays Taipei 2017</title>
+      <link>/blog/devopsdays-taipei-2017/</link>
+      <pubDate>Fri, 08 Sep 2017 00:00:00 +0000</pubDate>
+      
+      <guid>/blog/devopsdays-taipei-2017/</guid>
+      <description>前言 特別感謝查老師轉讓泰坦科技貴賓給我，有機會參加了今年度的 DevOpsDays Taipei，由於週一有要趕些計畫進度而錯過 open space 時間感到可惜，議程內容也十足的精彩，本文主要針對幾場幾場做部分紀錄。
+議程內容 DevOps to Agile 敏捷轉型經驗 by 葉秉哲(William Yeh) 講者從原先的 Whoscall 被 NAVER 收購後，從原先一個 MVP 產品，如何漸漸轉型成轉型營利導向的 Project，及當時主要領導 server team，如何鋪路讓同事們加入了解 DevsOps，逐漸導入轉型的心路歷程。
+Slide 提及到的「九個要點」及「三不四人」非常有感覺，回想起當年的系學會生活，有好幾分的相似：
+ 推動「政策」：不僅僅單只是學生代表需要有所作為，更需要與系上的師長們一同進退，就是這邊提及到的「最高階主管的支持與理解」 支持你的幹部們 == 第七點「找到工作上跟你理念相同的人」。 在工作上積極培養新人 == 「尋找下一任學弟妹」並給予協助。 內部要對於公司方向有共識 == 訂立階段性的任務目標，確立大家有一至性方向九個要點。  內部要對需要改善的問題有共識 內部要對於公司方向有共識 得先要有充分的政治實力 最高階主管的支持與理解 有一群對的人 增加一歇能互相切磋的職場外友人 找到工作上跟你理念相同的人 在工作上積極培養新人 掌舵者的 Know when   三不四人
+ 「不」舒服 「不」甘於 「不」能停 「人」背叛 「人」出現 「人」離開 「人」不理  另一有感例子，講者提及到「請求外援『牧師』來進行佈道」。 不僅僅在現實公司裡面會發生，其實在家庭環境裡也很常這樣，家庭成員會因你是熟悉的人而不相信你，請求外人講一句而勝過千言萬語（笑
+ 我實在告訴你們，沒有先知在他本鄉是受歡迎的。 From 耶穌 (馬太福音 13:57，路加福音 4:24)</description>
+    </item>
+    
+    <item>
+      <title>Setting up Ubuntu 16.04 Nginx HTTPS SSL</title>
+      <link>/blog/setting-up-nginx-https-ssl/</link>
+      <pubDate>Wed, 02 Aug 2017 00:00:00 +0000</pubDate>
+      
+      <guid>/blog/setting-up-nginx-https-ssl/</guid>
+      <description>前言 原先管理的主機是從 Ubuntu 14.04 升級至 16.04，當時所使用的 Let’s Encrypt certbot 版本也很舊了，終於有點時間來做整理。
+前後比較 查看了幾篇的文章 [1, 2, 3] 之後發現
+ 目前的 Let’s Encrypt certbot 已經可以透過 PPA 來安裝。可以到 certbot 官網 勾選使用的 service 及 OS 則有對應的教學。如選擇 Nginx + Ubuntu 16.04  sudo apt-get update sudo apt-get install software-properties-common sudo add-apt-repository ppa:certbot/certbot sudo apt-get update sudo apt-get install python-certbot-nginx   多數寫成 nginx snippets 在 .conf 中去 include 即可以使用，也就不必在每個 conf 重複撰寫一樣的設定。[4, 5]  ssl_protocols TLSv1 TLSv1.</description>
+    </item>
+    
+    <item>
+      <title>Manageing your dotfiles with git</title>
+      <link>/blog/managing-your-dotfiles/</link>
+      <pubDate>Tue, 27 Jun 2017 00:00:00 +0000</pubDate>
+      
+      <guid>/blog/managing-your-dotfiles/</guid>
+      <description>前言 由於學校計畫或是作業情況不同，經常使用非常多的語言環境，經常會讓自己 OS 處於小宇宙爆炸的情況。先前（其實是很久以前了 QQ）整理的 vimrc 可以在重灌系統的時候快速建立 vim plugin 及習慣設定。現在是該好好整理可以同時兼容 macOS 或 Linux 環境。
+何謂 Dotfiles 在家目錄 ls -al 查看所有檔案，可以發現許多 . 以點開頭的檔案，在 Unix-like 系統中，這些以點開頭的檔案都為隱藏檔，主要功能為環境中的相關設定。
+
+ .bash_profile or .profile 在 Bash shell 環境中，是家目錄裡第一個被讀取的檔案，在這檔案通常裡都會去檢查你的當前 shell 並去執行（或是 source）：
+dbash
+if running bash if [ -n &amp;quot;$BASH_VERSION&amp;quot; ]; then # include .bashrc if it exists if [ -f &amp;quot;$HOME/.bashrc&amp;quot; ]; then . &amp;quot;$HOME/.bashrc&amp;quot; fi fi  d
+ .bashrc or .zshrc 根據你所使用的 shell 環境則會有不同的相關設定， macOS 及 Linux 環境中基本上都是使用 Bash shell，預設 .</description>
+    </item>
+    
+    <item>
+      <title>Building Hexo on Github Pages</title>
+      <link>/blog/building-hexo-on-github-pages/</link>
+      <pubDate>Thu, 11 May 2017 00:00:00 +0000</pubDate>
+      
+      <guid>/blog/building-hexo-on-github-pages/</guid>
+      <description>前言 其實這篇教學應該要比先前兩篇早時間出來，才不會導致不小心誤用 hexo deploy 導致原先在 Github 的 source 直接被覆蓋 QQ
+Hexo 簡介 在 Github Pages 原生支援 Jekyll 靜態頁面當作你的首頁或是部落格，而 Hexo 也是一個支援 Markdown 格式且一鍵部屬產生靜態網站的框架，底層架構則是使用 Nodejs，最最最重要的是，作者還是台灣人唷！！
+Hexo 安裝 &amp;amp;&amp;amp; 套用 Theme 在首頁就可以看到基本的安裝指令如下：
+npm install hexo-cli -g hexo init blog cd blog npm install hexo server  在這邊我選擇的主題是 Hacker，在這邊先將全域設定檔 _config.yml 修改主題
+theme: Hacker  接著，將 Hacker 主題 clone 或是直接 download 至 themes 路徑，並設定主題設定檔 _config.yml 筆者在這邊已經先申請好 Disqus 當作留言回覆，以及 Google Analytics ID 了
+# duoshuo comment duoshuo: false duoshuo_name: # disqus comment disqus: true disqus_shortname: # google analytics googleTrackId:  Hexo 指令 &amp;amp;&amp;amp; 資產資料夾 新增文章 這裡 layout 預設有 draft，page，post三種，可自行新增 layout</description>
+    </item>
+    
+    <item>
+      <title>Windows 10 &#43; ubuntu 16.04 in Acer Swift 5</title>
+      <link>/blog/windows-10-ubuntu-16-04-in-acer-swift-5/</link>
+      <pubDate>Tue, 09 May 2017 00:00:00 +0000</pubDate>
+      
+      <guid>/blog/windows-10-ubuntu-16-04-in-acer-swift-5/</guid>
+      <description>前言 最近幫家人買了一台筆電，Acer Swift 5，型號是 SF514-51-50YK 基本上主打輕薄而且規格 i5 第七代的 CPU，512 SSD，CP 值滿高的 由於老哥多半使用 R language 來進行一些資料分析，需要雙系統，於是乎有了一連串的 debug time
+Step 1 首先進入 BIOS 設定 Boot Mode， Windows 會提醒你「在 windows 8 或較新的版本都已經使用 UEFT 模式，請勿更動。」，接下來關閉 Secure Boot。
+Step 2 由於原先是整顆硬碟為 windows 10，將硬碟壓縮看要分割多少空間給 Ubuntu，我這邊規劃為 100 GB windows 10，剩下空間都給 Ubuntu。
+分割好之後，再來處理的是 windows 8 之後出現的「快速啟動」。 如果 windows 的「快速啟動」功能是開啟的時候，會導致無法進入 Ubuntu 的開機程式 grub。
+「快速啟動」的位置於： -&amp;gt; 開啟控制台 -&amp;gt; 電源選項 -&amp;gt; 選擇按下按鈕時的行為 -&amp;gt; 變更無法使用的設定 -&amp;gt; 取消勾選 開啟快速啟動（建議選項） -&amp;gt; 儲存變更
+Step 3 筆者這邊預先已經先安裝 Ubuntu live USB 了，我們可以直接進行安裝動作。</description>
+    </item>
+    
+    <item>
+      <title>Windows multiple network card implement on VirtualBox</title>
+      <link>/blog/windows-multiple-network-card-implement-on-virtualbox/</link>
+      <pubDate>Tue, 09 May 2017 00:00:00 +0000</pubDate>
+      
+      <guid>/blog/windows-multiple-network-card-implement-on-virtualbox/</guid>
+      <description>前言 由於學校實驗室為了限制網路，因此每一台電腦都需要設定一 Static IP 才能對外連線。原先我們將 server 再接至到一台分享器就解決了這個問題，但又因為希望裡面有一台虛擬機器可以有一 Public IP，因此有了這個「特別」的解法。
+事前準備  兩張網路卡 申請一組 Public IP 及對應 MAC Address  Step 1 開啟 控制台 -&amp;gt; 網路和網際網路 -&amp;gt; 網路連線
+
+Step 2 找到對應的網卡後，點選右鍵內容並進入設定，可以看到下方圖示修改 Locally Administered Address ，輸入欄位則是輸入自己想要變動的 MAC Address
+
+Step 3 回到設定，就可以將我們的 Public IP 綁定到網卡上面
+ 
+￼
+Step 4 在 Virtual Box 上面，這裡選擇的是 Network Bridge 的模式，並且選擇剛剛綁定對外的網路卡
+
+Step 5 在虛擬機器上面，設定 MAC Address 及 Public IP</description>
+    </item>
+    
+  </channel>
+</rss>

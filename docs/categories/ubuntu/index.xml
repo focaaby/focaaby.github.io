@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Ubuntu on focaaby&#39;s Note</title>
+    <link>/categories/ubuntu/</link>
+    <description>Recent content in Ubuntu on focaaby&#39;s Note</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Wed, 02 Aug 2017 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="/categories/ubuntu/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Setting up Ubuntu 16.04 Nginx HTTPS SSL</title>
+      <link>/blog/setting-up-nginx-https-ssl/</link>
+      <pubDate>Wed, 02 Aug 2017 00:00:00 +0000</pubDate>
+      
+      <guid>/blog/setting-up-nginx-https-ssl/</guid>
+      <description>前言 原先管理的主機是從 Ubuntu 14.04 升級至 16.04，當時所使用的 Let’s Encrypt certbot 版本也很舊了，終於有點時間來做整理。
+前後比較 查看了幾篇的文章 [1, 2, 3] 之後發現
+ 目前的 Let’s Encrypt certbot 已經可以透過 PPA 來安裝。可以到 certbot 官網 勾選使用的 service 及 OS 則有對應的教學。如選擇 Nginx + Ubuntu 16.04  sudo apt-get update sudo apt-get install software-properties-common sudo add-apt-repository ppa:certbot/certbot sudo apt-get update sudo apt-get install python-certbot-nginx   多數寫成 nginx snippets 在 .conf 中去 include 即可以使用，也就不必在每個 conf 重複撰寫一樣的設定。[4, 5]  ssl_protocols TLSv1 TLSv1.</description>
+    </item>
+    
+    <item>
+      <title>Windows 10 &#43; ubuntu 16.04 in Acer Swift 5</title>
+      <link>/blog/windows-10-ubuntu-16-04-in-acer-swift-5/</link>
+      <pubDate>Tue, 09 May 2017 00:00:00 +0000</pubDate>
+      
+      <guid>/blog/windows-10-ubuntu-16-04-in-acer-swift-5/</guid>
+      <description>前言 最近幫家人買了一台筆電，Acer Swift 5，型號是 SF514-51-50YK 基本上主打輕薄而且規格 i5 第七代的 CPU，512 SSD，CP 值滿高的 由於老哥多半使用 R language 來進行一些資料分析，需要雙系統，於是乎有了一連串的 debug time
+Step 1 首先進入 BIOS 設定 Boot Mode， Windows 會提醒你「在 windows 8 或較新的版本都已經使用 UEFT 模式，請勿更動。」，接下來關閉 Secure Boot。
+Step 2 由於原先是整顆硬碟為 windows 10，將硬碟壓縮看要分割多少空間給 Ubuntu，我這邊規劃為 100 GB windows 10，剩下空間都給 Ubuntu。
+分割好之後，再來處理的是 windows 8 之後出現的「快速啟動」。 如果 windows 的「快速啟動」功能是開啟的時候，會導致無法進入 Ubuntu 的開機程式 grub。
+「快速啟動」的位置於： -&amp;gt; 開啟控制台 -&amp;gt; 電源選項 -&amp;gt; 選擇按下按鈕時的行為 -&amp;gt; 變更無法使用的設定 -&amp;gt; 取消勾選 開啟快速啟動（建議選項） -&amp;gt; 儲存變更
+Step 3 筆者這邊預先已經先安裝 Ubuntu live USB 了，我們可以直接進行安裝動作。</description>
+    </item>
+    
+  </channel>
+</rss>

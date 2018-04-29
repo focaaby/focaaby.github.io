@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Nodejs on focaaby&#39;s Note</title>
+    <link>/categories/nodejs/</link>
+    <description>Recent content in Nodejs on focaaby&#39;s Note</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Thu, 11 May 2017 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="/categories/nodejs/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Building Hexo on Github Pages</title>
+      <link>/blog/building-hexo-on-github-pages/</link>
+      <pubDate>Thu, 11 May 2017 00:00:00 +0000</pubDate>
+      
+      <guid>/blog/building-hexo-on-github-pages/</guid>
+      <description>前言 其實這篇教學應該要比先前兩篇早時間出來，才不會導致不小心誤用 hexo deploy 導致原先在 Github 的 source 直接被覆蓋 QQ
+Hexo 簡介 在 Github Pages 原生支援 Jekyll 靜態頁面當作你的首頁或是部落格，而 Hexo 也是一個支援 Markdown 格式且一鍵部屬產生靜態網站的框架，底層架構則是使用 Nodejs，最最最重要的是，作者還是台灣人唷！！
+Hexo 安裝 &amp;amp;&amp;amp; 套用 Theme 在首頁就可以看到基本的安裝指令如下：
+npm install hexo-cli -g hexo init blog cd blog npm install hexo server  在這邊我選擇的主題是 Hacker，在這邊先將全域設定檔 _config.yml 修改主題
+theme: Hacker  接著，將 Hacker 主題 clone 或是直接 download 至 themes 路徑，並設定主題設定檔 _config.yml 筆者在這邊已經先申請好 Disqus 當作留言回覆，以及 Google Analytics ID 了
+# duoshuo comment duoshuo: false duoshuo_name: # disqus comment disqus: true disqus_shortname: # google analytics googleTrackId:  Hexo 指令 &amp;amp;&amp;amp; 資產資料夾 新增文章 這裡 layout 預設有 draft，page，post三種，可自行新增 layout</description>
+    </item>
+    
+  </channel>
+</rss>

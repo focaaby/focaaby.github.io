@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Ethereum on focaaby&#39;s Note</title>
+    <link>/categories/ethereum/</link>
+    <description>Recent content in Ethereum on focaaby&#39;s Note</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Thu, 08 Mar 2018 15:57:07 +0800</lastBuildDate>
+    
+	<atom:link href="/categories/ethereum/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Setting up Ethereum private net in a single node</title>
+      <link>/blog/ethereum-private-net-in-a-single-node/</link>
+      <pubDate>Thu, 08 Mar 2018 15:57:07 +0800</pubDate>
+      
+      <guid>/blog/ethereum-private-net-in-a-single-node/</guid>
+      <description>Ethereum 簡介 一個 Open source 的專案，最具著名的就是用有圖靈完備語法的智能合約。
+動手做 在 Ethereum Homestead 有提到許多種的 client 可以使用，筆者挑選目前較多人使用的 go-ethereum。
+安裝 Ethereum Ubuntu sudo apt-get install software-properties-common sudo add-apt-repository -y ppa:ethereum/ethereum sudo apt-get update sudo apt-get install ethereum  macOS brew tap ethereum/ethereum brew install ethereum  創始區塊 在每個區塊鏈都必須有一個創始區塊，而本範例是透過 go-ethereum 建立私有鏈，而非連上 Ethereum 的主鏈。
+建立一個 genesis.json
+{ &amp;quot;config&amp;quot;: { &amp;quot;chainId&amp;quot;: 15, &amp;quot;homesteadBlock&amp;quot;: 0, &amp;quot;eip155Block&amp;quot;: 0, &amp;quot;eip158Block&amp;quot;: 0 }, &amp;quot;difficulty&amp;quot;: &amp;quot;200000000&amp;quot;, &amp;quot;gasLimit&amp;quot;: &amp;quot;2100000&amp;quot;, &amp;quot;alloc&amp;quot;: { &amp;quot;7df9a875a174b3bc565e6424a0050ebc1b2d1d82&amp;quot;: { &amp;quot;balance&amp;quot;: &amp;quot;300000&amp;quot; }, &amp;quot;f41c74c9ae680c1aa78f42e5647a62f353b7bdde&amp;quot;: { &amp;quot;balance&amp;quot;: &amp;quot;400000&amp;quot; } } }  透過 geth init genesis.</description>
+    </item>
+    
+  </channel>
+</rss>

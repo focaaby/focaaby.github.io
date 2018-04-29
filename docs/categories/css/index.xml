@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Css on focaaby&#39;s Note</title>
+    <link>/categories/css/</link>
+    <description>Recent content in Css on focaaby&#39;s Note</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Mon, 16 Oct 2017 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="/categories/css/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>CSS Tricks(1) - pseudo css elements after and before</title>
+      <link>/blog/css-tricks-1/</link>
+      <pubDate>Mon, 16 Oct 2017 00:00:00 +0000</pubDate>
+      
+      <guid>/blog/css-tricks-1/</guid>
+      <description>前言 最近接了一個 case 主要後台使用 ePage。稍微翻了一些資料，主要時空背景還是在十年前的時候，儘管可以自訂公告、相簿等模組，但是許多預設的 DOM 物件都無法做修改， 必須透過 CSS 方式去強制修改一些位置，因此也學習到了不少東西，預計會分好幾篇來紀錄。
+使用情境 在許多「連結」前面，多數為了要講究美或整齊，多半都會加入一些小 icon 來提醒使用者來快速找到對應的連結，在能自己修改 html 的情況下，都會加入類似 Font Awesome &amp;lt;i class=&amp;quot;menu-item-icon fa fa-fw fa-archive&amp;quot;&amp;gt;&amp;lt;/i&amp;gt; 寫法，本篇使用了 pseudo element 方式實作。
+pseudo - before &amp;amp; after 在 CSS pseudo element 中最常使用到的 ::after 及 ::before，允許你在該 DOM 物件裡加入一些內容，像是字串、圖片等。
+加入字串 See the Pen pseudo - before &amp;amp; after(1) by Jerry Wang (@focaaby) on CodePen.
+
+加入圖片 See the Pen pseudo - before &amp;amp; after(2) by Jerry Wang (@focaaby) on CodePen.</description>
+    </item>
+    
+    <item>
+      <title>CSS Tricks(2) - 3 kinds of border</title>
+      <link>/blog/css-tricks-2/</link>
+      <pubDate>Mon, 16 Oct 2017 00:00:00 +0000</pubDate>
+      
+      <guid>/blog/css-tricks-2/</guid>
+      <description>使用情境  navbar 的 hover 效果 在 banner titile 字體的設計 table 中客製化 border  解法 方法 1 直觀想法，直接 border-bottom 加上去。
+See the Pen border bottom(1) by Jerry Wang (@focaaby) on CodePen.
+
+方法 2 由於方法 1 不能「在不影響原內容 padding, margin」來調整 border 的長度及 box 距離。
+利用 position 先將父元素 &amp;lt;h1&amp;gt; 設定為 relative， ::after 設定為 absolute 再透過 left, bottom 設定相對位置。
+See the Pen border bottom(2) by Jerry Wang (@focaaby) on CodePen.
+
+組合技 border-bottom 幫 td 上底線，用 ::before 客製化兩兩 td 中間的線匡。</description>
+    </item>
+    
+  </channel>
+</rss>

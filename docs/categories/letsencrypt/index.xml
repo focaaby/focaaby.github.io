@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Letsencrypt on focaaby&#39;s Note</title>
+    <link>/categories/letsencrypt/</link>
+    <description>Recent content in Letsencrypt on focaaby&#39;s Note</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Sun, 25 Mar 2018 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="/categories/letsencrypt/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Create Let&#39;s Encrypt Wildcard Certificate With BIND</title>
+      <link>/blog/create-lets-encrypt-wildcard-certificate-with-nginx/</link>
+      <pubDate>Sun, 25 Mar 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/blog/create-lets-encrypt-wildcard-certificate-with-nginx/</guid>
+      <description>前言 去年暑假 Let&amp;rsquo;s Encrypt 公告了 2018 年將會提供 Wildcard Certificate，不過有一些些的小遲到了會～本篇將會介紹如何利用 certbot 來申請 Let&amp;rsquo;s Encrypt Wildcard Certificate。
+動手做 在開始之前先確定 certbot 版本，Wildcard 功能是在 0.22 之後才能使用的
+certbot --version certbot 0.22.2  指令 sudo certbot certonly --manual -d *.example.com --agree-tos --manual-public-ip-logging-ok --preferred-challenges dns-01 --server https://acme-v02.api.letsencrypt.org/directory  輸入你的信箱
+Saving debug log to /var/log/letsencrypt/letsencrypt.log Plugins selected: Authenticator manual, Installer None Enter email address (used for urgent renewal and security notices) (Enter &#39;c&#39; to cancel): example@gmail.com  修改 DNS 伺服器設定 TXT 紀錄</description>
+    </item>
+    
+    <item>
+      <title>Gitea with Nginx Reverse Proxy</title>
+      <link>/blog/gitea-with-nginx-reverse-proxy/</link>
+      <pubDate>Sun, 22 Oct 2017 00:00:00 +0000</pubDate>
+      
+      <guid>/blog/gitea-with-nginx-reverse-proxy/</guid>
+      <description>前言 先前在 DevOps Taipei 2017 有注意到有前輩在推廣 Gitea，因為個人也有些私人需求而來研究一下如何架設。
+本篇可知道：
+ 如何用 Docker 架設 Gitea server 利用 Nginx docker 設定 reverse proxy Let&amp;rsquo;s Encrypt 綁定 reverse proxy  開始安裝 Gitea 建立一個目錄儲存 Git 資料
+sudo mkdir -p /var/lib/gitea  由於稍後會用 Ngnix docker 實作 reverse proxy，這邊先開始撰寫 docker-compose
+version: &amp;quot;3&amp;quot; services: gitea: image: gitea/gitea:latest ports: - &amp;quot;10022:22&amp;quot; - &amp;quot;10080:3000&amp;quot; volumes: - /var/lib/gitea:/data container_name: gitea  docker-compose up -d 將 Gitea container 啟用後，瀏覽器開啟 http://hostname:10080 可以看到以下設定頁面</description>
+    </item>
+    
+    <item>
+      <title>Setting up Ubuntu 16.04 Nginx HTTPS SSL</title>
+      <link>/blog/setting-up-nginx-https-ssl/</link>
+      <pubDate>Wed, 02 Aug 2017 00:00:00 +0000</pubDate>
+      
+      <guid>/blog/setting-up-nginx-https-ssl/</guid>
+      <description>前言 原先管理的主機是從 Ubuntu 14.04 升級至 16.04，當時所使用的 Let’s Encrypt certbot 版本也很舊了，終於有點時間來做整理。
+前後比較 查看了幾篇的文章 [1, 2, 3] 之後發現
+ 目前的 Let’s Encrypt certbot 已經可以透過 PPA 來安裝。可以到 certbot 官網 勾選使用的 service 及 OS 則有對應的教學。如選擇 Nginx + Ubuntu 16.04  sudo apt-get update sudo apt-get install software-properties-common sudo add-apt-repository ppa:certbot/certbot sudo apt-get update sudo apt-get install python-certbot-nginx   多數寫成 nginx snippets 在 .conf 中去 include 即可以使用，也就不必在每個 conf 重複撰寫一樣的設定。[4, 5]  ssl_protocols TLSv1 TLSv1.</description>
+    </item>
+    
+  </channel>
+</rss>

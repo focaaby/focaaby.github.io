@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Https on focaaby&#39;s Note</title>
+    <link>/categories/https/</link>
+    <description>Recent content in Https on focaaby&#39;s Note</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Wed, 02 Aug 2017 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="/categories/https/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Setting up Ubuntu 16.04 Nginx HTTPS SSL</title>
+      <link>/blog/setting-up-nginx-https-ssl/</link>
+      <pubDate>Wed, 02 Aug 2017 00:00:00 +0000</pubDate>
+      
+      <guid>/blog/setting-up-nginx-https-ssl/</guid>
+      <description>前言 原先管理的主機是從 Ubuntu 14.04 升級至 16.04，當時所使用的 Let’s Encrypt certbot 版本也很舊了，終於有點時間來做整理。
+前後比較 查看了幾篇的文章 [1, 2, 3] 之後發現
+ 目前的 Let’s Encrypt certbot 已經可以透過 PPA 來安裝。可以到 certbot 官網 勾選使用的 service 及 OS 則有對應的教學。如選擇 Nginx + Ubuntu 16.04  sudo apt-get update sudo apt-get install software-properties-common sudo add-apt-repository ppa:certbot/certbot sudo apt-get update sudo apt-get install python-certbot-nginx   多數寫成 nginx snippets 在 .conf 中去 include 即可以使用，也就不必在每個 conf 重複撰寫一樣的設定。[4, 5]  ssl_protocols TLSv1 TLSv1.</description>
+    </item>
+    
+  </channel>
+</rss>

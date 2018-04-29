@@ -6,10 +6,9 @@ go:
 before_install:
   - sudo apt-get install snapd -y
   - sudo snap install hugo
-  - sudo snap refresh
 
 install:
-  - hugo -t hugo-future-imperfect
+  - snap run hugo -t hugo-future-imperfect
 
 deploy:
   target_branch: master

@@ -4,6 +4,7 @@ go:
   - "1.10"
 
 before_install:
+  - sudo apt-get install snap -y
   - sudo snap install hugo
 
 install:

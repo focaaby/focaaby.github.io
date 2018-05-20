@@ -1,11 +1,12 @@
-language: generic
+sudo: true
+dist: trusty
 
-before_install:
+install:
   - sudo apt-get install snapd -y
   - sudo snap install hugo
 
-install:
-  - snap run hugo -t hugo-future-imperfect
+script:
+  - /snap/bin/hugo -t hugo-future-imperfect
 
 deploy:
   target_branch: master
@@ -15,3 +16,7 @@ deploy:
   github_token: $GITHUB_TOKEN # Set in travis-ci.org dashboard
   on:
     branch: source
+
+notifications:
+  email:
+    on_failure: always

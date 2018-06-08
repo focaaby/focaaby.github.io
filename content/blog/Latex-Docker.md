@@ -14,7 +14,7 @@ type = "post"
 
 # 前言
 
-開始菸酒生的論文時刻，不想要陷入 Office 排版地獄，找到了幾個不錯 Latex 的排版。比較多都是成大模板，也有找到比較早年的台科模板。嘗試後，儘管第一個的模板已經將設定與內容拆的非常該進，但是我選擇了第二個，果然還是適合 `Makefile` 來編譯呀～
+開始菸酒生的論文時刻，不想要陷入 Office 排版地獄，找到了幾個不錯 Latex 的排版。比較多都是成大模板，也有找到比較早年的台科模板。嘗試後，儘管第一個的模板已經將設定與內容拆的非常乾淨，但是我選擇了第二個，果然還是適合 `Makefile` 來編譯呀～
 
 * [台灣國立成功大學碩博士用畢業論文 LaTex 模版](https://github.com/wengan-li/ncku-thesis-template-latex)
 * [NCKU-thesis](https://github.com/lycsjm/nckuthesis)

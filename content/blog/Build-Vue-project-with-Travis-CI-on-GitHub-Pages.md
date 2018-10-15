@@ -106,6 +106,3 @@ assetsPublicPath: './',
 
 1. [Building a JavaScript and Node.js project](https://docs.travis-ci.com/user/languages/javascript-with-nodejs/)
 2. [GitHub Pages Deployment](https://docs.travis-ci.com/user/deployment/pages/)
-
-
-

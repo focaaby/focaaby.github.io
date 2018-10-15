@@ -87,5 +87,3 @@ sudo ln -s /usr/share/adminer /var/www/<directory>
 1. [mysql_upgrade](https://mariadb.com/kb/en/library/mysql_upgrade/)
 1. [Moving from MySQL 5.7 to MariaDB 10.1
 ](https://medium.com/@mcloide/moving-from-mysql-5-7-to-mariadb-10-1-c7cb042ed8d8)
-
-

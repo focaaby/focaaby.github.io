@@ -96,13 +96,15 @@ open_file_cache_errors on;
 ### Nginx 網站設定
 
 * 盡可能的 cache 一些靜態檔案。
-    ```nginx
-    location ~* \.(ogg|ogv|svg|svgz|eot|otf|woff|mp4|ttf|css|rss|atom|js|jpg|jpeg|gif|png|ico|zip|tgz|gz|rar|bz2|doc|xls|exe|ppt|tar|mid|midi|wav|bmp|rtf)$ {
-            expires max;
-            log_not_found off;
-            access_log off;
-    }
-    ```
+
+```nginx
+location ~* \.(ogg|ogv|svg|svgz|eot|otf|woff|mp4|ttf|css|rss|atom|js|jpg|jpeg|gif|png|ico|zip|tgz|gz|rar|bz2|doc|xls|exe|ppt|tar|mid|midi|wav|bmp|rtf)$ {
+    expires max;
+    log_not_found off;
+    access_log off;
+}
+```
+
 * HTTP2 設定。
 
 ### WordPress Plugin

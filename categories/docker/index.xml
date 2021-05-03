@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>docker on focaaby's Note</title><link>/categories/docker/</link><description>Recent content in docker on focaaby's Note</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Sun, 20 May 2018 00:00:00 +0000</lastBuildDate><atom:link href="/categories/docker/index.xml" rel="self" type="application/rss+xml"/><item><title>Compile Latex in Docker</title><link>/blog/latex-docker/</link><pubDate>Sun, 20 May 2018 00:00:00 +0000</pubDate><guid>/blog/latex-docker/</guid><description>前言 開始菸酒生的論文時刻，不想要陷入 Office 排版地獄，找到了幾個不錯 Latex 的排版。比較多都是成大模板，也有找到比較早年的台科模板。嘗試後，儘管第一個的模板已經將設定與內容拆的非常乾淨，但是我選擇了第二個，果然還是適合 Makefile 來編譯呀～
+台灣國立成功大學碩博士用畢業論文 LaTex 模版 NCKU-thesis 台灣科技大學碩博士論文 Latex 模板 為什麼不用原生 Texlive 在 Linux 環境上，可以直接透過套件管理來安裝 Texlive 相關來源：
+// Ubuntu/Debian sudo apt install texlive-full 但是於 macOS 上需要安裝 MacTeX，但是不像 Linux 環境上，相關 TeX 相關套件會自動幫你安裝好，需要逐一安裝。
+因此使用 docker 便可以自己選擇套件，也可以跨平台編譯檔案。
+動手做 本來想要自己來寫一個 Dockerfile，不過 GitHub 上面也有人寫好的 latex-docker。
+作者也整理好了三個 tag，分別是
+blang/latex:ubuntu (:latest) - Dockerfile.ubuntu Ubuntu TexLive distribution: Old but stable, most needed package: texlive-full (3.9GB) blang/latex:ctanbasic - Dockerfile.basic CTAN TexLive Scheme-basic: Up-to-date, only basic packages, base for custom builds (500MB) blang/latex:ctanfull - Dockerfile.</description></item><item><title>Gitea with Nginx Reverse Proxy</title><link>/blog/gitea-with-nginx-reverse-proxy/</link><pubDate>Sun, 22 Oct 2017 00:00:00 +0000</pubDate><guid>/blog/gitea-with-nginx-reverse-proxy/</guid><description>前言 先前在 DevOps Taipei 2017 有注意到有前輩在推廣 Gitea，因為個人也有些私人需求而來研究一下如何架設。
+本篇可知道：
+如何用 Docker 架設 Gitea server 利用 Nginx docker 設定 reverse proxy Let&amp;rsquo;s Encrypt 綁定 reverse proxy 開始安裝 Gitea 建立一個目錄儲存 Git 資料
+sudo mkdir -p /var/lib/gitea 由於稍後會用 Ngnix docker 實作 reverse proxy，這邊先開始撰寫 docker-compose
+version: &amp;#34;3&amp;#34; services: gitea: image: gitea/gitea:latest ports: - &amp;#34;10022:22&amp;#34; - &amp;#34;10080:3000&amp;#34; volumes: - /var/lib/gitea:/data container_name: gitea docker-compose up -d 將 Gitea container 啟用後，瀏覽器開啟 http://hostname:10080 可以看到以下設定頁面
+主要看使用者習慣來選擇 DB，及 domain name 等，如果往後需要變更設定也可以修改此檔案 /var/lib/gitea/gitea/conf/app.</description></item></channel></rss>

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>latex on focaaby's Note</title><link>/categories/latex/</link><description>Recent content in latex on focaaby's Note</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Sun, 20 May 2018 00:00:00 +0000</lastBuildDate><atom:link href="/categories/latex/index.xml" rel="self" type="application/rss+xml"/><item><title>Compile Latex in Docker</title><link>/blog/latex-docker/</link><pubDate>Sun, 20 May 2018 00:00:00 +0000</pubDate><guid>/blog/latex-docker/</guid><description>前言 開始菸酒生的論文時刻，不想要陷入 Office 排版地獄，找到了幾個不錯 Latex 的排版。比較多都是成大模板，也有找到比較早年的台科模板。嘗試後，儘管第一個的模板已經將設定與內容拆的非常乾淨，但是我選擇了第二個，果然還是適合 Makefile 來編譯呀～
+台灣國立成功大學碩博士用畢業論文 LaTex 模版 NCKU-thesis 台灣科技大學碩博士論文 Latex 模板 為什麼不用原生 Texlive 在 Linux 環境上，可以直接透過套件管理來安裝 Texlive 相關來源：
+// Ubuntu/Debian sudo apt install texlive-full 但是於 macOS 上需要安裝 MacTeX，但是不像 Linux 環境上，相關 TeX 相關套件會自動幫你安裝好，需要逐一安裝。
+因此使用 docker 便可以自己選擇套件，也可以跨平台編譯檔案。
+動手做 本來想要自己來寫一個 Dockerfile，不過 GitHub 上面也有人寫好的 latex-docker。
+作者也整理好了三個 tag，分別是
+blang/latex:ubuntu (:latest) - Dockerfile.ubuntu Ubuntu TexLive distribution: Old but stable, most needed package: texlive-full (3.9GB) blang/latex:ctanbasic - Dockerfile.basic CTAN TexLive Scheme-basic: Up-to-date, only basic packages, base for custom builds (500MB) blang/latex:ctanfull - Dockerfile.</description></item></channel></rss>

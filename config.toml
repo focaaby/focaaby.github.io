@@ -1,4 +1,4 @@
-baseurl = "/"
+baseurl = "https://focaaby.github.io/"
 languageCode = "en-us"
 title = "focaaby's Note"
 theme = "hugo-future-imperfect"
@@ -91,7 +91,7 @@ canonifyURLs = true
 
   paragraph = "趨勢不可擋 流行不可跟 <br> 探索與思考技術的本質"
 
-  about     = "一個熱衷於流程的改進，原本寫寫前端偶爾管管伺服器，結果當了研究區塊練的菸酒生。"
+  about     = ""
 
   # This appears at the top of the sidebar above params.intro.header.
   # A width of less than 100px is recommended from a design perspective.

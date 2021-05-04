@@ -1,0 +1,214 @@
+<!doctype html><html><head><script type=application/ld+json>{"@context":"http://schema.org","@type":"BlogPosting","mainEntityOfPage":{"@type":"WebPage","@id":"\/"},"articleSection":"blog","name":"Push a Helm Chart to AWS ECR","headline":"Push a Helm Chart to AWS ECR","description":"AWS ECR supports pushing OCI artifacts to your repositories, and this article will go through how to push a Helm chart to ECR. Also, I try to use the Helm Dependency on ECR. The ECR supported the Helm template written in Helm Dependency, but ECR repositories are still not can not add as Helm repo currently.","inLanguage":"en","author":"","creator":"","publisher":"","accountablePerson":"","copyrightHolder":"","copyrightYear":"2021","datePublished":"2021-05-04 00:00:00 \u002b0000 UTC","dateModified":"2021-05-04 00:00:00 \u002b0000 UTC","url":"\/blog\/push-a-helm-chart-to-aws-ecr\/","wordCount":"697","keywords":["Blog"]}</script><title>Push a Helm Chart to AWS ECR</title><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><meta name=generator content="Hugo 0.82.1"><meta name=author content="Jerry Wang"><meta name=description content="AWS ECR supports pushing OCI artifacts to your repositories, and this article will go through how to push a Helm chart to ECR. Also, I try to use the Helm Dependency on ECR. The ECR supported the Helm template written in Helm Dependency, but ECR repositories are still not can not add as Helm repo currently."><meta name=twitter:card content="summary"><meta name=twitter:title content="Push a Helm Chart to AWS ECR"><meta name=twitter:description content="AWS ECR supports pushing OCI artifacts to your repositories, and this article will go through how to push a Helm chart to ECR. Also, I try to use the Helm Dependency on ECR. The ECR supported the Helm template written in Helm Dependency, but ECR repositories are still not can not add as Helm repo currently."><meta name=twitter:site content="@focaaby"><meta property="og:title" content="Push a Helm Chart to AWS ECR"><meta property="og:description" content="AWS ECR supports pushing OCI artifacts to your repositories, and this article will go through how to push a Helm chart to ECR. Also, I try to use the Helm Dependency on ECR. The ECR supported the Helm template written in Helm Dependency, but ECR repositories are still not can not add as Helm repo currently."><meta property="og:type" content="article"><meta property="og:url" content="/blog/push-a-helm-chart-to-aws-ecr/"><meta property="article:section" content="blog"><meta property="article:published_time" content="2021-05-04T00:00:00+00:00"><meta property="article:modified_time" content="2021-05-04T00:00:00+00:00"><meta property="og:image" content="//images/logo.png"><meta property="og:image:type" content="image/png"><meta property="og:image:width" content="512"><meta property="og:image:height" content="512"><meta itemprop=name content="Push a Helm Chart to AWS ECR"><meta itemprop=description content="AWS ECR supports pushing OCI artifacts to your repositories, and this article will go through how to push a Helm chart to ECR. Also, I try to use the Helm Dependency on ECR. The ECR supported the Helm template written in Helm Dependency, but ECR repositories are still not can not add as Helm repo currently."><meta itemprop=datePublished content="2021-05-04T00:00:00+00:00"><meta itemprop=dateModified content="2021-05-04T00:00:00+00:00"><meta itemprop=wordCount content="697"><meta itemprop=keywords content><link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/atom-one-light.min.css><link rel=stylesheet href="https://fonts.googleapis.com/css?family=Raleway:400,800,900|Source+Sans+Pro:400,700"><link rel=stylesheet href=https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css><link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.1.25/jquery.fancybox.min.css><link rel=stylesheet href=/css/main.css><link rel=stylesheet href=/css/add-on.css><link rel=stylesheet href=/css/academicons.min.css><link href=//cdn.bootcss.com/highlight.js/9.11.0/styles/github.min.css rel=stylesheet type=text/css><script type=application/javascript>var doNotTrack=!1;doNotTrack||(function(a,e,f,g,b,c,d){a.GoogleAnalyticsObject=b,a[b]=a[b]||function(){(a[b].q=a[b].q||[]).push(arguments)},a[b].l=1*new Date,c=e.createElement(f),d=e.getElementsByTagName(f)[0],c.async=1,c.src=g,d.parentNode.insertBefore(c,d)}(window,document,'script','https://www.google-analytics.com/analytics.js','ga'),ga('create','UA-66640410-2','auto'),ga('send','pageview'))</script></head><body><div id=wrapper><header id=header><h1><a href=/>blog</a></h1><nav class=links><ul><li><a href=/><i class="fa fa-home">&nbsp;</i>Home</a></li><li><a href=/blog/><i class="fa fa-newspaper-o">&nbsp;</i>Blog</a></li><li><a href=/categories/><i class="fa fa-sitemap">&nbsp;</i>Categories</a></li></ul></nav><nav class=main><ul><li id=share-nav class=share-menu style=display:none><a class=fa-share-alt href=#share-menu>Share</a></li><li class=search><a class=fa-search href=#search>Search</a><form id=search method=get action=//google.com/search><input type=text name=q placeholder=Search>
+<input type=hidden name=as_sitesearch value=/></form></li><li class=menu><a class=fa-bars href=#menu>Menu</a></li></ul></nav></header><section id=menu><section><form class=search method=get action=//google.com/search><input type=text name=q placeholder=Search>
+<input type=hidden name=as_sitesearch value=/></form></section><section><ul class=links><li><a href=/><h3><i class="fa fa-home">&nbsp;</i>Home</h3></a></li><li><a href=/blog/><h3><i class="fa fa-newspaper-o">&nbsp;</i>Blog</h3></a></li><li><a href=/categories/><h3><i class="fa fa-sitemap">&nbsp;</i>Categories</h3></a></li></ul></section><section class=recent-posts><div class=mini-posts><header><h3>Recent Posts</h3></header><article class=mini-post><header><h3><a href=/blog/push-a-helm-chart-to-aws-ecr/>Push a Helm Chart to AWS ECR</a></h3><time class=published datetime=2021-05-04>May 4, 2021</time></header></article><article class=mini-post><header><h3><a href=/blog/eks-service-with-internal-nlb-but-gets-timeouts-randomly/>EKS service with internal NLB, but gets timeouts randomly</a></h3><time class=published datetime=2021-04-23>April 23, 2021</time></header></article><article class=mini-post><header><h3><a href=/blog/wordpress-tuning/>WordPress Tuning</a></h3><time class=published datetime=2019-03-03>March 3, 2019</time></header></article><article class=mini-post><header><h3><a href=/blog/calculator-in-ubuntu-18.04-gnome-search/>Calculator in Ubuntu 18.04 GNOME search</a></h3><time class=published datetime=2019-01-12>January 12, 2019</time></header></article><article class=mini-post><header><h3><a href=/blog/ubuntu-18.04-on-lenovo-x1c-6g/>Install Ubuntu 18.04 on Lenovo Thinkpad X1 Carbon(6th)</a></h3><time class=published datetime=2019-01-12>January 12, 2019</time></header></article><a href=/blog/ class=button>View more posts</a></div></section></section><section id=share-menu><section id=social-share-nav><ul class=links><header><h3>Share this post <i class="fa fa-smile-o"></i></h3></header><li><a href="//twitter.com/share?url=%2fblog%2fpush-a-helm-chart-to-aws-ecr%2f&text=Push%20a%20Helm%20Chart%20to%20AWS%20ECR&via=focaaby" target=_blank class="share-btn twitter"><i class="fa fa-twitter"></i><p>Twitter</p></a></li><li><a href="//www.facebook.com/sharer/sharer.php?u=%2fblog%2fpush-a-helm-chart-to-aws-ecr%2f" target=_blank class="share-btn facebook"><i class="fa fa-facebook"></i><p>Facebook</p></a></li></ul></section></section><div id=main><article class=post><header><div class=title><h1><a href=/blog/push-a-helm-chart-to-aws-ecr/>Push a Helm Chart to AWS ECR</a></h1><p>AWS ECR supports pushing OCI artifacts to your repositories, and this article will go through how to push a Helm chart to ECR. Also, I try to use the Helm Dependency on ECR. The ECR supported the Helm template written in Helm Dependency, but ECR repositories are still not can not add as Helm repo currently.</p></div><div class=meta><time class=published datetime=2021-05-04>May 4, 2021</time>
+<span class=author>Jerry Wang</span><p>4 minute read</p></div></header><section id=social-share><ul class=icons><li><a href="//twitter.com/share?url=%2fblog%2fpush-a-helm-chart-to-aws-ecr%2f&text=Push%20a%20Helm%20Chart%20to%20AWS%20ECR&via=focaaby" target=_blank class="share-btn twitter"><i class="fa fa-twitter"></i><p>Twitter</p></a></li><li><a href="//www.facebook.com/sharer/sharer.php?u=%2fblog%2fpush-a-helm-chart-to-aws-ecr%2f" target=_blank class="share-btn facebook"><i class="fa fa-facebook"></i><p>Facebook</p></a></li></ul></section><div id=content><h2 id=summary>Summary</h2><p>AWS ECR supports pushing Open Container Initiative (OCI) artifacts[1][2] to your repositories, and this article will go through how to push a Helm chart to ECR. Also, I try to use the Helm Dependency on ECR. The ECR supported the Helm template written in Helm Dependency, but ECR repositories are still not can not add as Helm repo currently.</p><h2 id=testing-steps>Testing Steps</h2><ol><li><p>Following the steps in document[2] to install the Helm client version 3.</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash>$ helm version
+
+version.BuildInfo<span style=color:#f92672>{</span>Version:<span style=color:#e6db74>&#34;v3.5.3&#34;</span>, GitCommit:<span style=color:#e6db74>&#34;041ce5a2c17a58be0fcd5f5e16fb3e7e95fea622&#34;</span>, GitTreeState:<span style=color:#e6db74>&#34;dirty&#34;</span>, GoVersion:<span style=color:#e6db74>&#34;go1.15.8&#34;</span><span style=color:#f92672>}</span>
+</code></pre></div></li><li><p>Enable OCI support in the Helm 3 client.</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash>$ export HELM_EXPERIMENTAL_OCI<span style=color:#f92672>=</span><span style=color:#ae81ff>1</span>
+</code></pre></div></li><li><p>Create a repository to store your Helm chart</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash>$ aws ecr create-repository <span style=color:#ae81ff>\
+</span><span style=color:#ae81ff></span>        --repository-name helm-test <span style=color:#ae81ff>\
+</span><span style=color:#ae81ff></span>        --region eu-west-1
+<span style=color:#f92672>{</span>
+    <span style=color:#e6db74>&#34;repository&#34;</span>: <span style=color:#f92672>{</span>
+        <span style=color:#e6db74>&#34;repositoryArn&#34;</span>: <span style=color:#e6db74>&#34;arn:aws:ecr:eu-west-1:123456789012:repository/helm-test&#34;</span>,
+        <span style=color:#e6db74>&#34;registryId&#34;</span>: <span style=color:#e6db74>&#34;123456789012&#34;</span>,
+        <span style=color:#e6db74>&#34;repositoryName&#34;</span>: <span style=color:#e6db74>&#34;helm-test&#34;</span>,
+        <span style=color:#e6db74>&#34;repositoryUri&#34;</span>: <span style=color:#e6db74>&#34;123456789012.dkr.ecr.eu-west-1.amazonaws.com/helm-test&#34;</span>,
+        <span style=color:#e6db74>&#34;createdAt&#34;</span>: <span style=color:#e6db74>&#34;2021-05-04T15:07:49+00:00&#34;</span>,
+        <span style=color:#e6db74>&#34;imageTagMutability&#34;</span>: <span style=color:#e6db74>&#34;MUTABLE&#34;</span>,
+        <span style=color:#e6db74>&#34;imageScanningConfiguration&#34;</span>: <span style=color:#f92672>{</span>
+            <span style=color:#e6db74>&#34;scanOnPush&#34;</span>: false
+        <span style=color:#f92672>}</span>,
+        <span style=color:#e6db74>&#34;encryptionConfiguration&#34;</span>: <span style=color:#f92672>{</span>
+            <span style=color:#e6db74>&#34;encryptionType&#34;</span>: <span style=color:#e6db74>&#34;AES256&#34;</span>
+        <span style=color:#f92672>}</span>
+    <span style=color:#f92672>}</span>
+<span style=color:#f92672>}</span>
+</code></pre></div></li><li><p>Authenticate your Helm client to the Amazon ECR registry to which you intend to push your Helm chart.</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash>$ aws ecr get-login-password <span style=color:#ae81ff>\
+</span><span style=color:#ae81ff></span>    --region eu-west-1 | helm registry login <span style=color:#ae81ff>\
+</span><span style=color:#ae81ff></span>    --username AWS <span style=color:#ae81ff>\
+</span><span style=color:#ae81ff></span>    --password-stdin 123456789012.dkr.ecr.eu-west-1.amazonaws.com
+Login succeeded
+</code></pre></div></li><li><p>Use the following steps to create a test Helm chart.</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash>$ mkdir helm-tutorial
+$ cd helm-tutorial
+
+$ helm create mychart
+Creating mychart
+
+$ rm -rf ./mychart/templates/*
+
+$ cd mychart/templates
+$ cat <span style=color:#e6db74>&lt;&lt;EOF &gt; configmap.yaml
+</span><span style=color:#e6db74>&gt; apiVersion: v1
+</span><span style=color:#e6db74>&gt; kind: ConfigMap
+</span><span style=color:#e6db74>&gt; metadata:
+</span><span style=color:#e6db74>&gt;   name: mychart-configmap
+</span><span style=color:#e6db74>&gt; data:
+</span><span style=color:#e6db74>&gt;   myvalue: &#34;Hello World&#34;
+</span><span style=color:#e6db74>&gt; EOF</span>
+</code></pre></div></li><li><p>Save the chart locally and create an alias for the chart with your registry URI.</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash>$ cd ..
+$ helm chart save . mychart
+ref:     mychart:0.1.0
+digest:  66ac23dc1e383370778e2a8db2bf1d93e73f169af14569618dcec38a086405a4
+size:    1.4 KiB
+name:    mychart
+version: 0.1.0
+0.1.0: saved
+
+$ helm chart save . 123456789012.dkr.ecr.eu-west-1.amazonaws.com/helm-test:mychart
+ref:     123456789012.dkr.ecr.eu-west-1.amazonaws.com/helm-test:mychart
+digest:  2935917ffbc7492eae674f1e82308a2acd4e41b3b6db4c25b79a25095481ebca
+size:    1.4 KiB
+name:    mychart
+version: 0.1.0
+mychart: saved
+</code></pre></div></li><li><p>Identify the Helm chart to push. Run the helm chart list command to list the Helm charts on your system.</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash>$ helm chart list
+REF                                                             NAME    VERSION DIGEST  SIZE    CREATED
+123456789012.dkr.ecr.eu-west-1.amazonaws.com/helm-test:my...    mychart 0.1.0   66ac23d 1.4 KiB <span style=color:#ae81ff>2</span> minutes
+mychart:0.1.0
+</code></pre></div></li><li><p>Push the Helm chart using the helm chart push command.</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash>$ helm chart push 123456789012.dkr.ecr.eu-west-1.amazonaws.com/helm-test:mychart
+The push refers to repository <span style=color:#f92672>[</span>123456789012.dkr.ecr.eu-west-1.amazonaws.com/helm-test<span style=color:#f92672>]</span>
+ref:     123456789012.dkr.ecr.eu-west-1.amazonaws.com/helm-test:mychart
+digest:  2935917ffbc7492eae674f1e82308a2acd4e41b3b6db4c25b79a25095481ebca
+size:    1.4 KiB
+name:    mychart
+version: 0.1.0
+mychart: pushed to remote <span style=color:#f92672>(</span><span style=color:#ae81ff>1</span> layer, 1.4 KiB total<span style=color:#f92672>)</span>
+</code></pre></div></li><li><p>Describe your Helm chart.</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash>$ aws ecr describe-images <span style=color:#ae81ff>\
+</span><span style=color:#ae81ff></span>    --repository-name helm-test <span style=color:#ae81ff>\
+</span><span style=color:#ae81ff></span>    --region eu-west-1
+<span style=color:#f92672>{</span>
+    <span style=color:#e6db74>&#34;imageDetails&#34;</span>: <span style=color:#f92672>[</span>
+        <span style=color:#f92672>{</span>
+            <span style=color:#e6db74>&#34;registryId&#34;</span>: <span style=color:#e6db74>&#34;123456789012&#34;</span>,
+            <span style=color:#e6db74>&#34;repositoryName&#34;</span>: <span style=color:#e6db74>&#34;helm-test&#34;</span>,
+            <span style=color:#e6db74>&#34;imageDigest&#34;</span>: <span style=color:#e6db74>&#34;sha256:2935917ffbc7492eae674f1e82308a2acd4e41b3b6db4c25b79a25095481ebca&#34;</span>,
+            <span style=color:#e6db74>&#34;imageTags&#34;</span>: <span style=color:#f92672>[</span>
+                <span style=color:#e6db74>&#34;mychart&#34;</span>
+            <span style=color:#f92672>]</span>,
+            <span style=color:#e6db74>&#34;imageSizeInBytes&#34;</span>: 1610,
+            <span style=color:#e6db74>&#34;imagePushedAt&#34;</span>: <span style=color:#e6db74>&#34;2021-05-04T15:16:24+00:00&#34;</span>,
+            <span style=color:#e6db74>&#34;imageManifestMediaType&#34;</span>: <span style=color:#e6db74>&#34;application/vnd.oci.image.manifest.v1+json&#34;</span>,
+            <span style=color:#e6db74>&#34;artifactMediaType&#34;</span>: <span style=color:#e6db74>&#34;application/vnd.cncf.helm.config.v1+json&#34;</span>
+        <span style=color:#f92672>}</span>
+    <span style=color:#f92672>]</span>
+<span style=color:#f92672>}</span>
+</code></pre></div></li><li><p>Copy the mychart directory to mychart-dependency.</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash>$ cp -r mychart/ mychart-dependency
+</code></pre></div></li><li><p>Create another new ECR repository named helm-dependency.</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash>$ aws ecr create-repository <span style=color:#ae81ff>\
+</span><span style=color:#ae81ff></span>        --repository-name helm-dependency <span style=color:#ae81ff>\
+</span><span style=color:#ae81ff></span>        --region eu-west-1
+
+<span style=color:#f92672>{</span>
+    <span style=color:#e6db74>&#34;repository&#34;</span>: <span style=color:#f92672>{</span>
+        <span style=color:#e6db74>&#34;repositoryArn&#34;</span>: <span style=color:#e6db74>&#34;arn:aws:ecr:eu-west-1:123456789012:repository/helm-dependency&#34;</span>,
+        <span style=color:#e6db74>&#34;registryId&#34;</span>: <span style=color:#e6db74>&#34;123456789012&#34;</span>,
+        <span style=color:#e6db74>&#34;repositoryName&#34;</span>: <span style=color:#e6db74>&#34;helm-dependency&#34;</span>,
+        <span style=color:#e6db74>&#34;repositoryUri&#34;</span>: <span style=color:#e6db74>&#34;123456789012.dkr.ecr.eu-west-1.amazonaws.com/helm-dependency&#34;</span>,
+        <span style=color:#e6db74>&#34;createdAt&#34;</span>: <span style=color:#e6db74>&#34;2021-05-04T15:21:25+00:00&#34;</span>,
+        <span style=color:#e6db74>&#34;imageTagMutability&#34;</span>: <span style=color:#e6db74>&#34;MUTABLE&#34;</span>,
+        <span style=color:#e6db74>&#34;imageScanningConfiguration&#34;</span>: <span style=color:#f92672>{</span>
+            <span style=color:#e6db74>&#34;scanOnPush&#34;</span>: false
+        <span style=color:#f92672>}</span>,
+        <span style=color:#e6db74>&#34;encryptionConfiguration&#34;</span>: <span style=color:#f92672>{</span>
+            <span style=color:#e6db74>&#34;encryptionType&#34;</span>: <span style=color:#e6db74>&#34;AES256&#34;</span>
+        <span style=color:#f92672>}</span>
+    <span style=color:#f92672>}</span>
+<span style=color:#f92672>}</span>
+</code></pre></div></li><li><p>Update the Chart.yaml and add the configuration for Helm dependencies.</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash>$ cat Chart.yaml
+apiVersion: v2
+name: mychart-dependency
+description: A Helm chart <span style=color:#66d9ef>for</span> Kubernetes
+
+type: application
+version: 0.1.0
+appVersion: <span style=color:#e6db74>&#34;1.16.0&#34;</span>
+
+dependencies:
+- name: mychart
+  version: <span style=color:#e6db74>&#34;0.1.0&#34;</span>
+  repository: <span style=color:#e6db74>&#34;123456789012.dkr.ecr.eu-west-1.amazonaws.com/helm-test:mychart&#34;</span>
+</code></pre></div></li><li><p>Push Helm chart <code>mychart-dependency</code> using the helm chart push command.</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash>$ helm chart save . mychart-dependency
+ref:     mychart-dependency:0.1.0
+digest:  5d948b5d95b7e455215fd957930c057a2e556b437656713a7deefae0c8017dfa
+size:    1.5 KiB
+name:    mychart-dependency
+version: 0.1.0
+0.1.0: saved
+
+$ helm chart save . 123456789012.dkr.ecr.eu-west-1.amazonaws.com/helm-dependency:mychart-dependency
+ref:     123456789012.dkr.ecr.eu-west-1.amazonaws.com/helm-dependency:mychart-dependency
+digest:  a1200cf17bfae3a733c83b8981da2b2e2b44a79963ffc1dab53cbc58e6f8e8c9
+size:    1.5 KiB
+name:    mychart-dependency
+version: 0.1.0
+mychart-dependency: saved
+
+$ helm chart list
+REF                                                             NAME                    VERSION DIGEST  SIZE    CREATED
+123456789012.dkr.ecr.eu-west-1.amazonaws.com/helm-depende...    mychart-dependency      0.1.0   a1200cf 1.5 KiB <span style=color:#ae81ff>20</span> seconds
+123456789012.dkr.ecr.eu-west-1.amazonaws.com/helm-test:my...    mychart                 0.1.0   a1200cf 1.4 KiB <span style=color:#ae81ff>14</span> minutes
+mychart-dependency:0.1.0                                        mychart-dependency      0.1.0   a1200cf 1.5 KiB <span style=color:#ae81ff>58</span> seconds
+mychart:0.1.0                                                   mychart                 0.1.0   a1200cf 1.4 KiB <span style=color:#ae81ff>15</span> minutes
+
+$ helm chart push 123456789012.dkr.ecr.eu-west-1.amazonaws.com/helm-dependency:mychart-dependency
+The push refers to repository <span style=color:#f92672>[</span>123456789012.dkr.ecr.eu-west-1.amazonaws.com/helm-dependency<span style=color:#f92672>]</span>
+ref:     123456789012.dkr.ecr.eu-west-1.amazonaws.com/helm-dependency:mychart-dependency
+digest:  a1200cf17bfae3a733c83b8981da2b2e2b44a79963ffc1dab53cbc58e6f8e8c9
+size:    1.5 KiB
+name:    mychart-dependency
+version: 0.1.0
+mychart-dependency: pushed to remote <span style=color:#f92672>(</span><span style=color:#ae81ff>1</span> layer, 1.5 KiB total<span style=color:#f92672>)</span>
+</code></pre></div></li></ol><p>Helm dependency is using the &ldquo;repository&rdquo; URL should point to a Chart Repository[4], which is ECR not supported yet currently[5].</p><h2 id=references>References</h2><ol><li>OCI Artifact Support In Amazon ECR - <a href=https://docs.aws.amazon.com/AmazonECR/latest/userguide/push-oci-artifact.html>https://docs.aws.amazon.com/AmazonECR/latest/userguide/push-oci-artifact.html</a></li><li>ECR supports pushing Open Container Initiative (OCI) artifacts to your repositories - <a href=https://docs.aws.amazon.com/AmazonECR/latest/userguide/push-oci-artifact.html>https://docs.aws.amazon.com/AmazonECR/latest/userguide/push-oci-artifact.html</a></li><li>Using Amazon ECR Images with Amazon EKS - Installing a Helm chart hosted on Amazon ECR with Amazon EKS - <a href=https://docs.aws.amazon.com/AmazonECR/latest/userguide/ECR_on_EKS.html#using-helm-charts-eks>https://docs.aws.amazon.com/AmazonECR/latest/userguide/ECR_on_EKS.html#using-helm-charts-eks</a></li><li>Helm Dependency - <a href=https://helm.sh/docs/helm/helm_dependency/>https://helm.sh/docs/helm/helm_dependency/</a></li><li>Allow Helm to automatically install from a chart stored in an ECR repository - <a href=https://github.com/aws/containers-roadmap/issues/1116>https://github.com/aws/containers-roadmap/issues/1116</a></li></ol></div><footer><ul class=stats><li class=categories><ul><i class="fa fa-folder"></i><li><a class=article-category-link href=/categories/aws>aws</a></li><li><a class=article-category-link href=/categories/ecr>ecr</a></li><li><a class=article-category-link href=/categories/oci>oci</a></li><li><a class=article-category-link href=/categories/helm>helm</a></li></ul></li><li class=tags><ul></ul></li></ul></footer></article><article class=post><div id=disqus_thread></div><script type=application/javascript>var disqus_config=function(){};(function(){if(["localhost","127.0.0.1"].indexOf(window.location.hostname)!=-1){document.getElementById('disqus_thread').innerHTML='Disqus comments not available by default when the website is previewed locally.';return}var b=document,a=b.createElement('script');a.async=!0,a.src='//focaaby-blog.disqus.com/embed.js',a.setAttribute('data-timestamp',+new Date),(b.head||b.body).appendChild(a)})()</script><noscript>Please enable JavaScript to view the <a href=https://disqus.com/?ref_noscript>comments powered by Disqus.</a></noscript><a href=https://disqus.com class=dsq-brlink>comments powered by <span class=logo-disqus>Disqus</span></a></article><ul class="actions pagination"><li><a href=/blog/eks-service-with-internal-nlb-but-gets-timeouts-randomly/ class="button big previous">EKS service with internal NLB, but gets timeouts randomly</a></li></ul></div><section id=sidebar><section id=intro><header><h2>focaaby's Note</h2><p>趨勢不可擋 流行不可跟<br>探索與思考技術的本質</p></header></section><section class=recent-posts><div class=mini-posts><header><h3>Recent Posts</h3></header><div class=posts-container><article class=mini-post><header><h3><a href=/blog/push-a-helm-chart-to-aws-ecr/>Push a Helm Chart to AWS ECR</a></h3><time class=published datetime=2021-05-04>May 4, 2021</time></header></article><article class=mini-post><header><h3><a href=/blog/eks-service-with-internal-nlb-but-gets-timeouts-randomly/>EKS service with internal NLB, but gets timeouts randomly</a></h3><time class=published datetime=2021-04-23>April 23, 2021</time></header></article><article class=mini-post><header><h3><a href=/blog/wordpress-tuning/>WordPress Tuning</a></h3><time class=published datetime=2019-03-03>March 3, 2019</time></header></article><article class=mini-post><header><h3><a href=/blog/calculator-in-ubuntu-18.04-gnome-search/>Calculator in Ubuntu 18.04 GNOME search</a></h3><time class=published datetime=2019-01-12>January 12, 2019</time></header></article><article class=mini-post><header><h3><a href=/blog/ubuntu-18.04-on-lenovo-x1c-6g/>Install Ubuntu 18.04 on Lenovo Thinkpad X1 Carbon(6th)</a></h3><time class=published datetime=2019-01-12>January 12, 2019</time></header></article></div><a href=/blog/ class=button>View more posts</a></div></section><section id=categories><header><h3><a href=/categories/>Categories</a></h3></header><p><article><header><a href=/categories/ubuntu/>ubuntu</a>
+<span style=float:right>4</span></header></article></p><p><article><header><a href=/categories/letsencrypt/>letsencrypt</a>
+<span style=float:right>3</span></header></article></p><p><article><header><a href=/categories/nginx/>nginx</a>
+<span style=float:right>3</span></header></article></p><p><article><header><a href=/categories/aws/>aws</a>
+<span style=float:right>2</span></header></article></p><p><article><header><a href=/categories/css/>css</a>
+<span style=float:right>2</span></header></article></p><p><article><header><a href=/categories/docker/>docker</a>
+<span style=float:right>2</span></header></article></p><p><article><header><a href=/categories/github/>github</a>
+<span style=float:right>2</span></header></article></p><p><article><header><a href=/categories/hexo/>hexo</a>
+<span style=float:right>2</span></header></article></p><p><article><header><a href=/categories/linux/>linux</a>
+<span style=float:right>2</span></header></article></p><p><article><header><a href=/categories/mariadb/>mariadb</a>
+<span style=float:right>2</span></header></article></p><p><article><header><a href=/categories/mysql/>mysql</a>
+<span style=float:right>2</span></header></article></p><p><article><header><a href=/categories/windows/>windows</a>
+<span style=float:right>2</span></header></article></p><p><article><header><a href=/categories/algorithm/>algorithm</a>
+<span style=float:right>1</span></header></article></p><p><article><header><a href=/categories/apparmor/>apparmor</a>
+<span style=float:right>1</span></header></article></p><p><article><header><a href=/categories/bash/>bash</a>
+<span style=float:right>1</span></header></article></p><p><article><header><a href=/categories/bind/>bind</a>
+<span style=float:right>1</span></header></article></p><p><article><header><a href=/categories/blockchain/>blockchain</a>
+<span style=float:right>1</span></header></article></p><p><article><header><a href=/categories/certbot/>certbot</a>
+<span style=float:right>1</span></header></article></p><p><article><header><a href=/categories/conf/>conf</a>
+<span style=float:right>1</span></header></article></p><p><article><header><a href=/categories/devops/>devops</a>
+<span style=float:right>1</span></header></article></p><p><article><header><a href=/categories/distributed-system/>distributed-system</a>
+<span style=float:right>1</span></header></article></p><p><article><header><a href=/categories/dotfiles/>dotfiles</a>
+<span style=float:right>1</span></header></article></p><p><article><header><a href=/categories/dualboot/>dualboot</a>
+<span style=float:right>1</span></header></article></p><p><article><header><a href=/categories/ecr/>ecr</a>
+<span style=float:right>1</span></header></article></p><p><article><header><a href=/categories/eks/>eks</a>
+<span style=float:right>1</span></header></article></p><p><article><header><a href=/categories/elasticsearch/>elasticsearch</a>
+<span style=float:right>1</span></header></article></p><p><article><header><a href=/categories/elb/>elb</a>
+<span style=float:right>1</span></header></article></p><p><article><header><a href=/categories/ethereum/>ethereum</a>
+<span style=float:right>1</span></header></article></p><p><article><header><a href=/categories/gitea/>gitea</a>
+<span style=float:right>1</span></header></article></p><p><article><header><a href=/categories/gnome/>gnome</a>
+<span style=float:right>1</span></header></article></p><p><article><header><a href=/categories/helm/>helm</a>
+<span style=float:right>1</span></header></article></p><p><article><header><a href=/categories/https/>https</a>
+<span style=float:right>1</span></header></article></p><p><article><header><a href=/categories/hugo/>hugo</a>
+<span style=float:right>1</span></header></article></p><p><article><header><a href=/categories/k8s/>k8s</a>
+<span style=float:right>1</span></header></article></p><p><article><header><a href=/categories/kibana/>kibana</a>
+<span style=float:right>1</span></header></article></p><p><article><header><a href=/categories/kubernetes/>kubernetes</a>
+<span style=float:right>1</span></header></article></p><p><article><header><a href=/categories/latex/>latex</a>
+<span style=float:right>1</span></header></article></p><p><article><header><a href=/categories/logstash/>logstash</a>
+<span style=float:right>1</span></header></article></p><p><article><header><a href=/categories/network/>network</a>
+<span style=float:right>1</span></header></article></p><p><article><header><a href=/categories/nodejs/>nodejs</a>
+<span style=float:right>1</span></header></article></p><p><article><header><a href=/categories/oci/>oci</a>
+<span style=float:right>1</span></header></article></p><p><article><header><a href=/categories/raft/>raft</a>
+<span style=float:right>1</span></header></article></p><p><article><header><a href=/categories/ssl/>ssl</a>
+<span style=float:right>1</span></header></article></p><p><article><header><a href=/categories/travis-ci/>travis-ci</a>
+<span style=float:right>1</span></header></article></p><p><article><header><a href=/categories/uefi/>uefi</a>
+<span style=float:right>1</span></header></article></p><p><article><header><a href=/categories/virtualbox/>virtualbox</a>
+<span style=float:right>1</span></header></article></p><p><article><header><a href=/categories/vue/>vue</a>
+<span style=float:right>1</span></header></article></p><p><article><header><a href=/categories/wordpress/>wordpress</a>
+<span style=float:right>1</span></header></article></p><p><article><header><a href=/categories/x1c/>x1c</a>
+<span style=float:right>1</span></header></article></p><p><article><header><a href=/categories/zsh/>zsh</a>
+<span style=float:right>1</span></header></article></p></section><section id=mini-bio><h3>About</h3><p>一個熱衷於流程的改進，原本寫寫前端偶爾管管伺服器，結果當了研究區塊練的菸酒生。</p><a href=/about/ class=button>Learn More</a></section><section id=footer><ul class=icons><li><a href=/index.xml type=application/rss+xml target=_blank title=RSS class="fa fa-rss"></a></li><li><a href=//github.com/focaaby target=_blank title=GitHub class="fa fa-github"></a></li><li><a href=//linkedin.com/in/focaaby target=_blank title=LinkedIn class="fa fa-linkedin"></a></li><li><a href=//facebook.com/focaaby target=_blank title=Facebook class="fa fa-facebook"></a></li><li><a href=//twitter.com/focaaby target=_blank title=Twitter class="fa fa-twitter"></a></li><li><a href=//telegram.me/focaaby target=_blank title=telegram class="fa fa-telegram"></a></li><li><a href=mailto:focaaby@gmail.com title=Email class="fa fa-envelope"></a></li></ul><p class=copyright>&copy; 2021
+focaaby's Note
+.
+Powered by <a href=//gohugo.io target=_blank>Hugo</a></p></section></section></div><a id=back-to-top href=# class="fa fa-arrow-up fa-border fa-2x"></a><script src=//cdn.bootcss.com/highlight.js/9.11.0/highlight.min.js></script><script src=//cdn.bootcss.com/highlight.js/9.11.0/languages/bash.min.js></script><script src=//cdn.bootcss.com/highlight.js/9.11.0/languages/json.min.js></script><script src=//cdn.bootcss.com/highlight.js/9.11.0/languages/yaml.min.js></script><script src=//cdn.bootcss.com/highlight.js/9.11.0/languages/css.min.js></script><script src=//cdn.bootcss.com/highlight.js/9.11.0/languages/java.min.js></script><script src=//cdn.bootcss.com/highlight.js/9.11.0/languages/javascript.min.js></script><script src=//cdn.bootcss.com/highlight.js/9.11.0/languages/nginx.min.js></script><script src=//cdn.bootcss.com/highlight.js/9.11.0/languages/markdown.min.js></script><script>hljs.configure({languages:[]}),hljs.initHighlightingOnLoad()</script><script src=https://code.jquery.com/jquery-3.2.1.min.js integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin=anonymous></script><script src=https://cdnjs.cloudflare.com/ajax/libs/skel/3.0.1/skel.min.js></script><script src=https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.1.25/jquery.fancybox.min.js></script><script src=/js/util.js></script><script src=/js/main.js></script><script src=/js/backToTop.js></script><script>hljs.initHighlightingOnLoad()</script><script src=//yihui.name/js/math-code.js></script><script async src="//cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML"></script></body></html>

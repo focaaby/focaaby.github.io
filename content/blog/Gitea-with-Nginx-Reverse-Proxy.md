@@ -12,7 +12,7 @@ type = "post"
 
 +++
 
-# 前言
+## 前言
 
 先前在 DevOps Taipei 2017 有注意到有前輩在推廣 Gitea，因為個人也有些私人需求而來研究一下如何架設。
 
@@ -22,9 +22,9 @@ type = "post"
 * 利用 Nginx docker 設定 reverse proxy
 * Let's Encrypt 綁定 reverse proxy
 
-# 開始安裝
+## 開始安裝
 
-## Gitea
+### Gitea
 
 建立一個目錄儲存 Git 資料
 
@@ -53,7 +53,7 @@ services:
 
 主要看使用者習慣來選擇 DB，及 domain name 等，如果往後需要變更設定也可以修改此檔案 `/var/lib/gitea/gitea/conf/app.ini`
 
-## Nginx Reverse Proxy
+### Nginx Reverse Proxy
 
 新增一資料夾 `nginx`，主要放置 nginx 設定檔、virtual host 設定及 snippets。
 
@@ -114,7 +114,7 @@ services:
 
 接著開啟瀏覽器 http://hostname ，測試 80 port 是否能正常開啟 Gitea 網頁，代表確實有透過 Nginx reverse proxy 連接 Docker 內部的 Gitea server。
 
-## Let's Encrypt Setting
+### Let's Encrypt Setting
 
 安裝 [Certbot](https://certbot.eff.org/)
 
@@ -145,7 +145,7 @@ ssl_stapling on;
 ssl_stapling_verify on;
 resolver 8.8.8.8 8.8.4.4 valid=300s;
 resolver_timeout 5s;
-# disable HSTS header for now
+## disable HSTS header for now
 add_header Strict-Transport-Security "max-age=63072000; includeSubDomains; preload";
 add_header X-Frame-Options DENY;
 add_header X-Frame-Options SAMEORIGIN;
@@ -177,7 +177,7 @@ server {
 		include snippets//proxy_params;
 	}
 
-  # SSL Setting
+  ## SSL Setting
 	ssl_certificate /etc/letsencrypt/live/YOUR.DOMAIN/fullchain.pem;
   ssl_certificate_key /etc/letsencrypt/live/YOUR.DOMAIN/privkey.pem;
 	include snippets/ssl-params.conf;
@@ -209,7 +209,7 @@ services:
       - /etc/letsencrypt:/etc/letsencrypt
 ```
 
-# Reference
+## Reference
 
 1. [Gitea docs 用 Docker 安裝](https://docs.gitea.io/zh-tw/install-with-docker/)
 1. [Certbot Installation](https://certbot.eff.org/#ubuntuxenial-other)

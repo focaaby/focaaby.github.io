@@ -14,9 +14,9 @@ type = "post"
 
 記錄一下把 MySQL 移植更新至 MariaDB 10.2
 
-# 動手做
+## 動手做
 
-## 備份
+### 備份
 
 先備份所有的資料及設定黨
 
@@ -24,14 +24,14 @@ type = "post"
 1. 備份 `/var/lib/mysql`
 1. 備份 `/etc/mysql` 的設定檔
 
-## 刪除 MySQL
+### 刪除 MySQL
 
 務必確定備份好資料後，再進行接下來的動作否則造成~~災難~~
 
 * 刪除 `/var/lib/mysql` 資料夾
 * `sudo apt remove mysql mysql-server mysql-common`
 
-## 安裝 MariaDB 10.2
+### 安裝 MariaDB 10.2
 
 ```bash
 sudo apt-get install software-properties-common
@@ -41,7 +41,7 @@ sudo apt update
 sudo apt install mariadb-server
 ```
 
-## mysql_upgrade
+### mysql_upgrade
 
 將原本資料還原到 MariaDB
 
@@ -57,17 +57,17 @@ mysql -u <user> -p < all_databases.sql
 mysql_upgrade -u <user> -p
 ```
 
-## GUI 介面
+### GUI 介面
 
 筆者這邊提供兩種方式參考
 
-### Adminer
+#### Adminer
 
 ```bash
 sudo apt install adminer
 ```
 
-### phpMyAdmin
+#### phpMyAdmin
 
 ```bash
 sudo apt install phpmyadmin
@@ -82,7 +82,7 @@ sudo ln -s /usr/share/adminer /var/www/<directory>
 
 接著就是設定 server 部分，即可以完工。
 
-# 參考資料
+## 參考資料
 
 1. [mysql_upgrade](https://mariadb.com/kb/en/library/mysql_upgrade/)
 1. [Moving from MySQL 5.7 to MariaDB 10.1

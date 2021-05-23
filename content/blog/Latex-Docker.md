@@ -12,7 +12,7 @@ type = "post"
 
 +++
 
-# 前言
+## 前言
 
 開始菸酒生的論文時刻，不想要陷入 Office 排版地獄，找到了幾個不錯 Latex 的排版。比較多都是成大模板，也有找到比較早年的台科模板。嘗試後，儘管第一個的模板已經將設定與內容拆的非常乾淨，但是我選擇了第二個，果然還是適合 `Makefile` 來編譯呀～
 
@@ -20,7 +20,7 @@ type = "post"
 * [NCKU-thesis](https://github.com/lycsjm/nckuthesis)
 * [台灣科技大學碩博士論文 Latex 模板](https://code.google.com/archive/p/ntust-thesis/)
 
-# 為什麼不用原生 Texlive
+## 為什麼不用原生 Texlive
 
 在 Linux 環境上，可以直接透過套件管理來安裝 Texlive 相關來源：
 
@@ -33,7 +33,7 @@ sudo apt install texlive-full
 
 因此使用 docker 便可以自己選擇套件，也可以跨平台編譯檔案。
 
-# 動手做
+## 動手做
 
 本來想要自己來寫一個 Dockerfile，不過 GitHub 上面也有人寫好的 [latex-docker](https://github.com/blang/latex-docker)。
 
@@ -66,7 +66,7 @@ exec docker run --rm -i --user="$(id -u):$(id -g)" --net=none -v "$PWD":/data "$
 ./latexdockercmd.sh /bin/sh -c "make"
 ```
 
-# 問題
+## 問題
 
 由於論文會使用中文字體，如標楷體，但是問題是在 container 裡面沒有該字體。而我所解決方式就是，將字體檔案也放置於專案目錄底下，再透過 `\fontspec` 設定讀取目錄字體檔案。
 
@@ -126,4 +126,3 @@ exec docker run --rm -i --user="$(id -u):$(id -g)" --net=none -v "$PWD":/data "$
     ├── ntust_logo.pdf
     └── ntust_watermark.tex
 ```
-

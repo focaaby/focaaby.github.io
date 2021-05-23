@@ -12,11 +12,11 @@ type = "post"
 
 +++
 
-# 前言
+## 前言
 
 繼[上篇](https://focaaby.github.io/blog/migrating-mysql-2-mariadb/)移轉 MySQL 至 MariaDB 成功後都尚未重開伺服器過，重起之後發現 DB 持續無法正常開始運作。
 
-# 檢查 log
+## 檢查 log
 
 MariaDB 的 error log 於 syslog。
 
@@ -36,7 +36,7 @@ Mar 30 17:26:11 host mysqld[1274]: 2018-03-30 17:26:11 139927148820224 [Note] In
 Mar 30 17:26:11 host kernel: [  108.349415] audit: type=1400 audit(1522401971.049:12): apparmor="DENIED" operation="sendmsg" info="Failed name lookup - disconnected path" error=-13 profile="/usr/sbin/mysqld" name="run/systemd/notify" pid=1274 comm="mysqld" requested_mask="w" denied_mask="w" fsuid=105 ouid=0
 ```
 
-# 原因
+## 原因
 
 首先找到[相關問題](https://askubuntu.com/questions/750604/why-does-mariadb-keep-dying-how-do-i-stop-it)是將 AppArmor 加入 MySQL 的設定檔，不過嘗試無效。
 
@@ -49,7 +49,7 @@ AppArmor 簡介：
 因此可以將原先 MySQL AppArmor 的設定部分關閉。
 
 
-# 解決方法
+## 解決方法
 
 ```bash
 sudo ln -s /etc/apparmor.d/usr.sbin.mysqld /etc/apparmor.d/disable/
@@ -58,9 +58,8 @@ sudo reboot
 
 接著再將伺服器重開機即可。
 
-# 參考連結
+## 參考連結
 
 1. https://askubuntu.com/questions/750604/why-does-mariadb-keep-dying-how-do-i-stop-it
 1. https://datahunter.org/apparmor：簡介了 AppArmor 用途
-1. https://bugs.launchpad.net/maria/+bug/876550：
-The default AppArmor profile in MariaDB for Ubuntu has been removed.
+1. https://bugs.launchpad.net/maria/+bug/876550： The default AppArmor profile in MariaDB for Ubuntu has been removed.

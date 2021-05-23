@@ -12,11 +12,11 @@ type = "post"
 
 +++
 
-# 前因
+## 前因
 
 經常在 DevOps TW 看到分析管理 log 有那些套件可以使用，傳統來說彙整 log 會使用 [RSYSLOG](https://www.rsyslog.com/)，而筆者想要嘗試的則是近幾年興起應用於 big data 的圖表分析 Elasticsearch + Logstash + Kibana，取每個元件字首簡稱 ELK Stack。
 
-# 選用原因
+## 選用原因
 
 主要筆者的環境需要將簡單將 `syslog` 或 Nginx `acess_log` 日誌檔案做基本處理，且具有 buffer 功能。
 而 Logstash 就是具有以上功能並有 pipeline 分成三階段（inputs → filters → outputs）的概念：
@@ -25,11 +25,11 @@ type = "post"
 2. filter：`grok` 相似正規表示法，但較方便於將 log file 處理成想要的格式。
 3. ouput：經過 filter 處理過的資料，輸出結果多樣。如：檔案、Elatcsearch、statsd 等。
 
-# 動手做
+## 動手做
 
 筆者習慣利用 docker 來架設測試環境，當然也有已經整理好的 [Docker ELK stack Github repo](https://github.com/deviantony/docker-elk)
 
-## 啟用 ELK Stack
+### 啟用 ELK Stack
 
 ```bash
 git clone https://github.com/deviantony/docker-elk.git
@@ -55,7 +55,7 @@ curl -XPOST -D- 'http://localhost:5601/api/saved_objects/index-pattern' \
 nc localhost 5000 < /path/to/logfile.log
 ```
 
-# 新增 nginx docker 測試 log
+## 新增 nginx docker 測試 log
 
 在 `docker-compose.yaml` 加入 Nginx 並將 log 也掛載於 Logstash。
 
@@ -169,7 +169,7 @@ ab -c 50 -n 50 -t 10 http://127.0.0.1/
 
 
 
-# 參考連結
+## 參考連結
 
 1. [RSYSLOG](https://www.rsyslog.com/)
 1. https://www.elastic.co/guide/en/logstash/master/pipeline.html

@@ -11,17 +11,17 @@ title = "Setting up Ethereum private net in a single node"
 type = "post"
 +++
 
-# Ethereum 簡介
+## Ethereum 簡介
 
 一個 [Open source 的專案](https://github.com/ethereum/)，最具著名的就是用有圖靈完備語法的智能合約。
 
-# 動手做
+## 動手做
 
 在 Ethereum Homestead 有提到許多種的 client 可以使用，筆者挑選目前較多人使用的 go-ethereum。
 
-## 安裝 Ethereum
+### 安裝 Ethereum
 
-### Ubuntu
+#### Ubuntu
 
 ```bash
 sudo apt-get install software-properties-common
@@ -30,14 +30,14 @@ sudo apt-get update
 sudo apt-get install ethereum
 ```
 
-### macOS
+#### macOS
 
 ```bash
 brew tap ethereum/ethereum
 brew install ethereum
 ```
 
-## 創始區塊
+### 創始區塊
 
 在每個區塊鏈都必須有一個創始區塊，而本範例是透過 go-ethereum 建立私有鏈，而非連上 Ethereum 的主鏈。
 
@@ -63,7 +63,7 @@ brew install ethereum
 透過 `geth init genesis.json` 初始化私有鏈
 
 
-## geth 指令
+### geth 指令
 
 ```bash
 geth --networkid 9487 \
@@ -83,7 +83,7 @@ console 參數：
 * rpcapi：提供哪些 API，筆者這邊是全開以方便測試
 
 
-# 參考連結
+## 參考連結
 
 1. [Ethereum GitHub](https://github.com/ethereum/)
 2. [Ethereum Homestead](http://www.ethdocs.org/en/latest/index.html)

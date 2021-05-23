@@ -12,11 +12,11 @@ type = "post"
 
 +++
 
-# 前言
+## 前言
 
 看到 gslin 大大的[直接在-ubuntu-的-unity-上直接計算](https://blog.gslin.org/archives/2018/12/17/8638/%E7%9B%B4%E6%8E%A5%E5%9C%A8-ubuntu-%E7%9A%84-unity-%E4%B8%8A%E7%9B%B4%E6%8E%A5%E8%A8%88%E7%AE%97/)，後來想到 Ubuntu 18.04 應該也要有這功能才對，於是就找了一下。
 
-# 過程
+## 過程
 
 在 18.04 desktop 預設是用 GNOME 作為 GUI 介面，並使用了 Snap 安裝預設套件，
 包含了 `GNOME` 及 `計算機` 等相關套件。
@@ -35,6 +35,6 @@ sudo apt install gnome-calculator
 
 {{< img-post path="date" file="calculator-in-dash.png" alt="calculator-in-dash￼" >}}
 
-# 相關連結
+## 相關連結
 
 * [built-in-calculator-to-gnome-search-window](https://askubuntu.com/questions/1062973/built-in-calculator-to-gnome-search-window)

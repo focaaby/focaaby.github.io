@@ -12,7 +12,8 @@ type = "post"
 
 +++
 
-# 前言
+## 前言
+
 以前在兼差幫忙管理系所網站時，那時候學校主流 [CMS](https://en.wikipedia.org/wiki/Content_management_system ) 使用的是 Joomla，當年也從 apache2 移轉使用 nginx 做了些微的調教，但是也沒有認真做個筆記。剛好公司的官網也要從 windows 移轉到 linux 伺服器上，不過使用的是 WordPress，也稍微 survey 了相關調教，本篇為移轉過程及相關調教筆記。
 
 ## 安裝與移轉

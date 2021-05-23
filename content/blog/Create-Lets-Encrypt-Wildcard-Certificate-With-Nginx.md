@@ -11,11 +11,11 @@ title = "Create Let's Encrypt Wildcard Certificate With BIND"
 type = "post"
 +++
 
-# 前言
+## 前言
 
 [去年暑假](https://letsencrypt.org/2017/07/06/wildcard-certificates-coming-jan-2018.html) Let's Encrypt 公告了 2018 年將會提供 Wildcard Certificate，不過有一些些的小遲到了會～本篇將會介紹如何利用 `certbot` 來申請 Let's Encrypt Wildcard Certificate。
 
-# 動手做
+## 動手做
 
 在開始之前先確定 `certbot` 版本，Wildcard 功能是在 0.22 之後才能使用的
 
@@ -24,7 +24,7 @@ certbot --version
 certbot 0.22.2
 ```
 
-## 指令
+### 指令
 
 ```bash
 sudo certbot certonly --manual -d *.example.com --agree-tos --manual-public-ip-logging-ok --preferred-challenges dns-01 --server https://acme-v02.api.letsencrypt.org/directory
@@ -125,11 +125,8 @@ server {
 }
 ```
 
-# 參考來源
+## 參考來源
 
 1. https://letsencrypt.org/2017/07/06/wildcard-certificates-coming-jan-2018.html
 1. http://forum.centos-webpanel.com/dns/bind-dns-record-examples/
 1. https://sinkcup.github.io/letsencrypt-wildcard-certificate
-
-
-

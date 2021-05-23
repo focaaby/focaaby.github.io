@@ -78,7 +78,3 @@ Slide 提及到的「九個要點」及「三不四人」非常有感覺，回�
 - [DevOps to Agile 敏捷轉型經驗](https://www.slideshare.net/williamyeh/devops-to-agile-transformation)
 - [大會 9/5 共筆](https://hackmd.io/c/Hy_QrEBKb/https%3A%2F%2Fhackmd.io%2FBwUwnArBDMBmIFoBsYwAYEBYDsATRARsAQQrkttMAMbYQBMwuaQA%3Fview)
 - [大會 9/6 共筆](https://hackmd.io/c/Bk1Ih4SKb/https%3A%2F%2Fhackmd.io%2FCYVgZgTAbARgjCAtCCBTAHIgLBNiCcMA7BIkSAAz5QDG6cFUFAhkA%3D%3D%3D%3Fedit)
-
-
-
-

@@ -12,15 +12,15 @@ type = "post"
 
 +++
 
-# 前言
+## 前言
 
 其實這篇教學應該要比先前兩篇早時間出來，才不會導致不小心誤用 `hexo deploy` 導致原先在 Github 的 source 直接被覆蓋 QQ
 
-## Hexo 簡介
+### Hexo 簡介
 
 在 Github Pages 原生支援 [Jekyll](https://jekyllrb.com/) 靜態頁面當作你的首頁或是部落格，而 [Hexo](https://hexo.io) 也是一個支援 Markdown 格式且一鍵部屬產生靜態網站的框架，底層架構則是使用 Nodejs，最最最重要的是，作者還是台灣人唷！！
 
-## Hexo 安裝 && 套用 Theme
+### Hexo 安裝 && 套用 Theme
 
 在首頁就可以看到基本的安裝指令如下：
 
@@ -54,9 +54,9 @@ disqus_shortname:
 googleTrackId:
 ```
 
-## Hexo 指令 && 資產資料夾
+### Hexo 指令 && 資產資料夾
 
-### 新增文章
+#### 新增文章
 
 這裡 layout 預設有 `draft`，`page`，`post`三種，可自行新增 layout
 
@@ -64,7 +64,7 @@ googleTrackId:
 hexo new [layout] <title>
 ```
 
-### 資產資料夾
+#### 資產資料夾
 
 由於筆者會附上一些操作的截圖，Hexo 這邊提供了相關套件可以使用 `hexo-asset-image`
 
@@ -86,7 +86,7 @@ post_asset_folder: true
 └── Windows-10-ubuntu-16-04-in-Acer-Swift-5.md
 ```
 
-## Hexo 部屬
+### Hexo 部屬
 
 在這個步驟中有一些觀念要先釐清：
 

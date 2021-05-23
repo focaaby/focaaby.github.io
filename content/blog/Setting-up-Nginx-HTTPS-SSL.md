@@ -13,11 +13,11 @@ type = "post"
 
 
 
-# 前言
+## 前言
 
 原先管理的主機是從 Ubuntu 14.04 升級至 16.04，當時所使用的 Let’s Encrypt certbot 版本也很舊了，終於有點時間來做整理。
 
-# 前後比較
+## 前後比較
 
 查看了幾篇的文章 [1, 2, 3] 之後發現
 
@@ -58,7 +58,7 @@ ssl_dhparam /etc/ssl/certs/dhparam.pem;
 sudo certbot --nginx or // sudo certbot --nginx certonly
 ```
 
-# 整理後的設定檔
+## 整理後的設定檔
 
 ```nginx
 server {
@@ -127,13 +127,13 @@ location ~ \.php$ {
 	include /etc/nginx/fastcgi.conf;
 }
 ```
-# 心得
+## 心得
 
 整理後的 site config 把原先的 50 多行整理到剩不到 30 行，扣除各個網站不同需求，整理完的 snippet 也都可以重複利用。
 
 SSL 憑證方面，再次證明了 opensource 的強大之處，certbot 已經是非常完善的套件，初次使用也可以快速設定好憑證，期待 Let’s Encrypt 明年的 Wildcard Certificates [6]，如此一來只需要一個憑證就可以將該所 sub-domain 設定好。
 
-# 相關連結
+## 相關連結
 
 1. [How To Secure Nginx with Let's Encrypt on Ubuntu 16.04](https://www.digitalocean.com/community/tutorials/how-to-secure-nginx-with-let-s-encrypt-on-ubuntu-16-04)
 1. [How to setup Let's Encrypt for Nginx on Ubuntu 16.04 (including IPv6, HTTP/2 and A+ SLL rating)](https://www.digitalocean.com/community/tutorials/how-to-secure-nginx-with-let-s-encrypt-on-ubuntu-16-04)
@@ -141,4 +141,3 @@ SSL 憑證方面，再次證明了 opensource 的強大之處，certbot 已經�
 1. [Cipherli.st Strong Ciphers for Apache, nginx and Lighttpd](https://cipherli.st/)
 1. [Strong SSL Security on nginx](https://raymii.org/s/tutorials/Strong_SSL_Security_On_nginx.html)
 1. [Wildcard Certificates Coming January 2018](https://letsencrypt.org/2017/07/06/wildcard-certificates-coming-jan-2018.html)
-

@@ -143,8 +143,20 @@ metadata:
         service.beta.kubernetes.io/aws-load-balancer-type: "nlb-ip"
 ```
 
-The NLB adds support to configure client IP preservation[5], therefore, we can expect that AWS LoadBalancer Controller will support the same feature in the future.
+### 2021-05-21 Update
 
+The NLB adds support to configure client IP preservation[5] with instance mode, which is supported in version v2.2.0[6]. Thus, we can use the following annotations for the client IP preservation with instance mode.
+
+* Note: Please use the annotaion `service.beta.kubernetes.io/aws-load-balancer-type: "external"` to ignore in-tree `cloud-controller-manager`[7] to create in-tree NLB service.
+
+```yaml
+...
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-type: "external"
+    service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: instance
+    service.beta.kubernetes.io/aws-load-balancer-target-group-attributes: "preserve_client_ip.enabled=false"
+...
+```
 
 ## References
 
@@ -153,3 +165,5 @@ The NLB adds support to configure client IP preservation[5], therefore, we can e
 3. Target groups for your Network Load Balancers - Client IP preservation[https://docs.aws.amazon.com/elasticloadbalancing/latest/network/load-balancer-target-groups.html#client-ip-preservation](https://docs.aws.amazon.com/elasticloadbalancing/latest/network/load-balancer-target-groups.html#client-ip-preservation)
 4. [https://kubernetes-sigs.github.io/aws-load-balancer-controller/latest/guide/service/nlb_ip_mode/#nlb-ip-mode](https://kubernetes-sigs.github.io/aws-load-balancer-controller/latest/guide/service/nlb_ip_mode/#nlb-ip-mode)
 5. [https://docs.aws.amazon.com/elasticloadbalancing/latest/network/load-balancer-target-groups.html#client-ip-preservation](https://docs.aws.amazon.com/elasticloadbalancing/latest/network/load-balancer-target-groups.html#client-ip-preservation)
+6. AWS Load Balancer Controller - v2.2.0 - [https://github.com/kubernetes-sigs/aws-load-balancer-controller/releases/tag/v2.2.0](https://github.com/kubernetes-sigs/aws-load-balancer-controller/releases/tag/v2.2.0)
+7. AWS Load Balancer Controller - Network Load Balancer - [https://kubernetes-sigs.github.io/aws-load-balancer-controller/v2.2/guide/service/nlb/#configuration](https://kubernetes-sigs.github.io/aws-load-balancer-controller/v2.2/guide/service/nlb/#configuration)

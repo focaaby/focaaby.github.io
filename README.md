@@ -14,6 +14,7 @@ viewer -> CloudFront (focaaby.com, www.focaaby.com) -> CloudFront Function -> S3
 - Legacy Ghost URL handling: `infra/cloudfront-viewer-request.js` (CloudFront Function `focaaby-blog-viewer-request`)
   - `www` -> apex, `/<slug>/amp/` -> `/<slug>/`, `/sitemap-*.xml` -> `/sitemap.xml`, `/page/1/` -> parent,
     `/rss/` -> `/index.xml` (rewrite), missing trailing slash -> add slash. All 301.
+- `focaaby.github.io` (GitHub Pages) only serves the redirect pages in `pages-redirect/`, deployed by `.github/workflows/pages-redirect.yml`.
 - GA4 `G-X4XH8Z193H`, AdSense and utterances comments are configured in `hugo.toml` `[params]`.
 
 ## Writing

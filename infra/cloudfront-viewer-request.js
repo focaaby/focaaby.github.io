@@ -1,4 +1,4 @@
-// CloudFront Function (cloudfront-js-2.0), viewer-request, distribution REDACTED-DISTRIBUTION-ID
+// CloudFront Function (cloudfront-js-2.0), viewer-request
 // Keeps legacy Ghost URLs working after the move to Hugo + S3 website hosting.
 var CANONICAL_HOST = 'focaaby.com';
 

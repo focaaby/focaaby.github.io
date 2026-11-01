@@ -16,8 +16,8 @@ concurrency:
 env:
   HUGO_VERSION: 0.169.0
   AWS_REGION: ap-northeast-1
-  S3_BUCKET: REDACTED-BUCKET
-  CLOUDFRONT_DISTRIBUTION_ID: REDACTED-DISTRIBUTION-ID
+  S3_BUCKET: ${{ secrets.S3_BUCKET }}                                   # repo secret (masked in logs)
+  CLOUDFRONT_DISTRIBUTION_ID: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}  # repo secret (masked in logs)
   AWS_ROLE_ARN: arn:aws:iam::437269060125:role/focaaby-blog-github-deploy
 
 jobs:

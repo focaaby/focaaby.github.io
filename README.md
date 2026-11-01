@@ -5,8 +5,8 @@ Hugo static site, migrated from Ghost 5.80 (Nov 2026). The theme in `layouts/` i
 ## Architecture
 
 ```
-git push main -> GitHub Actions (hugo build) -> S3 REDACTED-BUCKET (ap-northeast-1, website hosting)
-                                             -> CloudFront REDACTED-DISTRIBUTION-ID invalidation /*
+git push main -> GitHub Actions (hugo build) -> S3 bucket (website hosting)
+                                             -> CloudFront invalidation /*
 viewer -> CloudFront (focaaby.com, www.focaaby.com) -> CloudFront Function -> S3 website endpoint
 ```
 
@@ -35,9 +35,10 @@ Front matter used by the theme: `title`, `slug`, `date`, `tags` (first = primary
 - `/resume.pdf` is **not in git**. Build it in the resume repo and upload it manually; `deploy.yml` excludes it from `s3 sync --delete`.
 
 ```bash
+# export S3_BUCKET=... CLOUDFRONT_DISTRIBUTION_ID=...   (values in private notes)
 cd ~/Project/resume && ./latexdockercmd.sh            # -> resume.pdf
-aws s3 cp resume.pdf s3://REDACTED-BUCKET/resume.pdf --profile focaaby \
+aws s3 cp resume.pdf "s3://$S3_BUCKET/resume.pdf" --profile focaaby \
   --content-type application/pdf --cache-control 'max-age=3600' \
   --content-disposition 'attachment; filename="Mao-Lin_Wang_Resume.pdf"'
-aws cloudfront create-invalidation --distribution-id REDACTED-DISTRIBUTION-ID --paths /resume.pdf --profile focaaby
+aws cloudfront create-invalidation --distribution-id "$CLOUDFRONT_DISTRIBUTION_ID" --paths /resume.pdf --profile focaaby
 ```

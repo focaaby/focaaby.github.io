@@ -51,3 +51,10 @@ disableKinds = ["taxonomy", "section"]
   name = "Resume"
   pageRef = "/resume"
   weight = 10
+
+[[menus.main]]
+  name = "EKS Book"
+  url = "https://www.eksbook.com/"
+  weight = 20
+  [menus.main.params]
+    external = true

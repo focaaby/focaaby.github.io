@@ -45,7 +45,7 @@
                 {{- with site.Menus.main }}
                 <ul class="nav">
                     {{- range . }}
-                    <li class="nav-{{ .Name | urlize }}{{ if $.IsMenuCurrent "main" . }} nav-current{{ end }}"><a href="{{ .URL }}">{{ .Name }}</a></li>
+                    <li class="nav-{{ .Name | urlize }}{{ if $.IsMenuCurrent "main" . }} nav-current{{ end }}"><a href="{{ .URL }}"{{ if .Params.external }} target="_blank" rel="noopener"{{ end }}>{{ .Name }}</a></li>
                     {{- end }}
                 </ul>
                 {{- end }}

@@ -1,7 +1,7 @@
 baseURL = "https://focaaby.com/"
 title = "focaaby's Notes"
 locale = "en"
-timeZone = "Asia/Singapore"
+timeZone = "Asia/Taipei"
 hasCJKLanguage = true
 enableRobotsTXT = true
 disableKinds = ["taxonomy", "section"]

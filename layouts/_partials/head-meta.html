@@ -4,12 +4,15 @@
 {{- $desc := "" -}}{{- $title := "" -}}{{- $ogType := "website" -}}{{- $img := $site.Params.cover_image -}}
 {{- if $isPost -}}
   {{- $title = .Params.meta_title | default .Title -}}
-  {{- $desc = .Params.description -}}
+  {{- $desc = .Description -}}
   {{- $ogType = "article" -}}
   {{- $img = .Params.feature_image | default "" -}}
+{{- else if .IsPage -}}
+  {{- $title = .Title -}}
+  {{- $desc = .Description -}}
 {{- else if eq .Kind "term" -}}
   {{- $title = printf "%s - %s" .Title $site.Title -}}
-  {{- $desc = .Params.description | default "" -}}
+  {{- $desc = .Description | default "" -}}
   {{- if eq .Data.Plural "authors" -}}{{- $ogType = "profile" -}}{{- $img = "" -}}{{- end -}}
 {{- else -}}
   {{- $title = $site.Title -}}
@@ -18,18 +21,19 @@
 {{- $absImg := "" -}}{{- with $img -}}{{- if hasPrefix . "/" -}}{{- $absImg = absURL (strings.TrimPrefix "/" .) -}}{{- else -}}{{- $absImg = . -}}{{- end -}}{{- end -}}
 {{- $canonical := .Permalink -}}
 {{- $paged := in (slice "home" "term") .Kind -}}
-{{- if $paged -}}{{- with .Paginator -}}{{- if gt .PageNumber 1 -}}{{- $canonical = .URL | absURL -}}{{- end -}}{{- end -}}{{- end -}}
+{{- $pager := partial "pager.html" . -}}
+{{- if $paged -}}{{- with $pager -}}{{- if gt .PageNumber 1 -}}{{- $canonical = .URL | absURL -}}{{- end -}}{{- end -}}{{- end -}}
 {{- with .Params.canonical_url -}}{{- $canonical = . -}}{{- end -}}
-    {{- $isPaged := and (in (slice "home" "term") .Kind) (gt .Paginator.PageNumber 1) }}
+    {{- $isPaged := and $paged (gt $pager.PageNumber 1) }}
     {{ if not $isPaged }}{{ with $desc }}<meta name="description" content="{{ . }}">{{ end }}{{ end }}
     <link rel="icon" href="/favicon.ico" type="image/x-icon">
     <link rel="canonical" href="{{ $canonical }}">
     <meta name="referrer" content="no-referrer-when-downgrade">
     {{- if $paged }}
-    {{ with .Paginator.Prev }}<link rel="prev" href="{{ .URL | absURL }}">{{ end }}
-    {{ with .Paginator.Next }}<link rel="next" href="{{ .URL | absURL }}">{{ end }}
+    {{ with $pager.Prev }}<link rel="prev" href="{{ .URL | absURL }}">{{ end }}
+    {{ with $pager.Next }}<link rel="next" href="{{ .URL | absURL }}">{{ end }}
     {{- end }}
-    {{- $pageNo := 1 -}}{{- if (in (slice "home" "term") .Kind) -}}{{- $pageNo = .Paginator.PageNumber -}}{{- end -}}
+    {{- $pageNo := 1 -}}{{- if (in (slice "home" "term") .Kind) -}}{{- $pageNo = $pager.PageNumber -}}{{- end -}}
     {{- if eq $pageNo 1 }}
     <meta property="og:site_name" content="{{ $site.Title }}">
     <meta property="og:type" content="{{ $ogType }}">

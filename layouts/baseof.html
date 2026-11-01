@@ -3,9 +3,9 @@
 <head>
 
     {{- $title := site.Title -}}
-    {{- if and .IsPage (eq .Section "posts") -}}{{- $title = .Params.meta_title | default .Title -}}
+    {{- if .IsPage -}}{{- $title = .Params.meta_title | default .Title -}}
     {{- else if eq .Kind "term" -}}{{- $title = printf "%s - %s" .Title site.Title -}}{{- end -}}
-    {{- if and (in (slice "home" "term") .Kind) (gt .Paginator.PageNumber 1) -}}{{- $title = printf "%s (Page %d)" $title .Paginator.PageNumber -}}{{- end }}
+    {{- if in (slice "home" "term") .Kind -}}{{- $pg := partial "pager.html" . -}}{{- if gt $pg.PageNumber 1 -}}{{- $title = printf "%s (Page %d)" $title $pg.PageNumber -}}{{- end -}}{{- end }}
     <title>{{ $title }}</title>
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />

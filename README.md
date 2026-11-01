@@ -28,3 +28,16 @@ hugo server                              # preview at http://localhost:1313
 
 Front matter used by the theme: `title`, `slug`, `date`, `tags` (first = primary tag), `authors: ["focaaby"]`,
 `excerpt` (card text), `description`, `custom_excerpt`, `feature_image`, `feature_image_caption`.
+
+## Resume
+
+- `/resume/` is `content/resume.html` (hand-converted from https://github.com/focaaby/resume `resume.tex`, phone number omitted).
+- `/resume.pdf` is **not in git**. Build it in the resume repo and upload it manually; `deploy.yml` excludes it from `s3 sync --delete`.
+
+```bash
+cd ~/Project/resume && ./latexdockercmd.sh            # -> resume.pdf
+aws s3 cp resume.pdf s3://REDACTED-BUCKET/resume.pdf --profile focaaby \
+  --content-type application/pdf --cache-control 'max-age=3600' \
+  --content-disposition 'attachment; filename="Mao-Lin_Wang_Resume.pdf"'
+aws cloudfront create-invalidation --distribution-id REDACTED-DISTRIBUTION-ID --paths /resume.pdf --profile focaaby
+```

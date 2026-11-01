@@ -1,10 +1,14 @@
-{{- /* Mimic Ghost img_url size helper. ctx: dict "src" "size" */ -}}
+{{- /* Mimic Ghost img_url size helper. ctx: dict "src" "size". Returns a raw string. */ -}}
 {{- $src := .src -}}
+{{- $out := $src -}}
 {{- $w := index (dict "xxs" "30" "xs" "100" "s" "300" "m" "600" "l" "1000" "xl" "2000") .size -}}
 {{- if hasPrefix $src "/content/images/" -}}
   {{- $rel := strings.TrimPrefix "/content/images/" $src -}}
   {{- $sized := printf "content/images/size/w%s/%s" $w $rel -}}
-  {{- if and (not (hasSuffix (lower $src) ".svg")) (fileExists (printf "static/%s" $sized)) -}}/{{ $sized }}{{- else -}}{{ $src }}{{- end -}}
+  {{- if and (not (hasSuffix (lower $src) ".svg")) (fileExists (printf "static/%s" $sized)) -}}
+    {{- $out = printf "/%s" $sized -}}
+  {{- end -}}
 {{- else if in $src "images.unsplash.com" -}}
-  {{- replaceRE `([?&])w=\d+` (printf "${1}w=%s" $w) $src -}}
-{{- else -}}{{ $src }}{{- end -}}
+  {{- $out = replaceRE `([?&])w=\d+` (printf "${1}w=%s" $w) $src -}}
+{{- end -}}
+{{- return $out -}}

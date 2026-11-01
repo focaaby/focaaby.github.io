@@ -1,6 +1,6 @@
-{{ define "body_class" }}{{ if gt .Paginator.PageNumber 1 }}paged{{ else }}home-template{{ end }}{{ end }}
+{{ define "body_class" }}{{ if gt (partial "pager.html" .).PageNumber 1 }}paged{{ else }}home-template{{ end }}{{ end }}
 {{ define "main" }}
-{{- $pager := .Paginate (where site.RegularPages "Section" "posts") -}}
+{{- $pager := partial "pager.html" . -}}
 {{- if eq $pager.PageNumber 1 }}
     <div class="site-header-content">
         {{ with site.Params.cover_image }}

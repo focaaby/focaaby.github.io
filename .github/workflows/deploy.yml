@@ -42,8 +42,9 @@ jobs:
           role-to-assume: ${{ env.AWS_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
 
+      # resume.pdf is uploaded to S3 manually (not tracked in git), keep it out of --delete
       - name: Sync to S3
-        run: aws s3 sync public/ "s3://${S3_BUCKET}/" --delete --no-progress
+        run: aws s3 sync public/ "s3://${S3_BUCKET}/" --delete --no-progress --exclude "resume.pdf"
 
       - name: Invalidate CloudFront
         run: |

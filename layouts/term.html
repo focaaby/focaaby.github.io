@@ -1,6 +1,6 @@
-{{ define "body_class" }}{{ if gt .Paginator.PageNumber 1 }}paged {{ end }}{{ if eq .Data.Plural "authors" }}author-template author-{{ .Data.Term }}{{ else }}tag-template tag-{{ .Data.Term }}{{ end }}{{ end }}
+{{ define "body_class" }}{{ if gt (partial "pager.html" .).PageNumber 1 }}paged {{ end }}{{ if eq .Data.Plural "authors" }}author-template author-{{ .Data.Term }}{{ else }}tag-template tag-{{ .Data.Term }}{{ end }}{{ end }}
 {{ define "main" }}
-{{- $pager := .Paginate .Pages -}}
+{{- $pager := partial "pager.html" . -}}
 {{- $total := len .Pages -}}
 {{ if eq .Data.Plural "authors" }}
 <section class="outer">
@@ -49,7 +49,7 @@
                         </header>
                         <div class="post-card-excerpt">
                             <p>
-                                {{ with .Params.description }}{{ . }}{{ else }}A collection of {{ $total }} {{ cond (eq $total 1) "post" "posts" }}{{ end }}
+                                {{ with .Description }}{{ . }}{{ else }}A collection of {{ $total }} {{ cond (eq $total 1) "post" "posts" }}{{ end }}
                             </p>
                         </div>
                     </div>

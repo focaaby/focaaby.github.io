@@ -45,3 +45,9 @@ disableKinds = ["taxonomy", "section"]
 # Ghost-exported posts are stored as raw HTML content files
 [security]
   allowContent = ['^text/html$', '^text/markdown$']
+
+# Header navigation (rendered like Ghost {{navigation}})
+[[menus.main]]
+  name = "Resume"
+  pageRef = "/resume"
+  weight = 10

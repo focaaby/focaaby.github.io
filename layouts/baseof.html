@@ -42,6 +42,13 @@
                 </a>
             </div>
             <div class="gh-head-menu">
+                {{- with site.Menus.main }}
+                <ul class="nav">
+                    {{- range . }}
+                    <li class="nav-{{ .Name | urlize }}{{ if $.IsMenuCurrent "main" . }} nav-current{{ end }}"><a href="{{ .URL }}">{{ .Name }}</a></li>
+                    {{- end }}
+                </ul>
+                {{- end }}
             </div>
             <div class="gh-head-actions">
                 <div class="gh-social">

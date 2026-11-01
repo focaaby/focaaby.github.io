@@ -1,0 +1,26 @@
+---
+title: "AWS VPC CNI plugin random livenessProbe failures after upgrading to Kubernetes 1.20"
+slug: "aws-vpc-cni-plugin-random-livenessprobe-failures-after-upgrading-to-kubernetes-1-20"
+date: "2022-01-24T04:42:07+08:00"
+lastmod: "2022-01-24T04:43:00+08:00"
+draft: false
+tags: ["kubernetes", "vpc-cni", "eks", "aws"]
+authors: ["focaaby"]
+featured: false
+custom_excerpt: "In this article, I will show you Kubelet fixed Exec Probe Timeouts issue, whose timeout of 1s is respected and triggers probes failures and pods restart.\n"
+excerpt: "In this article, I will show you Kubelet fixed Exec Probe Timeouts issue, whose timeout of 1s is respected and triggers probes failures and pods restart."
+description: "In this article, I will show you Kubelet fixed Exec Probe Timeouts issue, whose timeout of 1s is respected and triggers probes failures and pods restart.\n"
+feature_image: "https://images.unsplash.com/photo-1477506252414-b2954dbdacf3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwxMTc3M3wwfDF8c2VhcmNofDE1fHxwb2RzfGVufDB8fHx8MTY0Mjk3MDU2Mw&ixlib=rb-1.2.1&q=80&w=2000"
+feature_image_caption: "Photo by <a href=\"https://unsplash.com/@rachaelgorjestani?utm_source=ghost&utm_medium=referral&utm_campaign=api-credit\">Rachael Gorjestani</a> / <a href=\"https://unsplash.com/?utm_source=ghost&utm_medium=referral&utm_campaign=api-credit\">Unsplash</a>"
+reading_time: "2 min read"
+---
+<h2 id="problem">Problem</h2><p>After upgrading the EKS 1.19 to 1.20, we can find some pods were using readiness and liveness probes failures without reason message. Take AWS VPC CNI plugin <code>aws-node</code> pod as an example below:</p><pre><code># Pod event
+...
+Normal   Killing    85m                    kubelet  Container aws-node failed liveness probe, will be restarted
+Normal   Pulling    85m (x2 over 106m)     kubelet  Pulling image "602401143452.dkr.ecr.eu-central-1.amazonaws.com/amazon-k8s-cni:v1.8.0-eksbuild.1"
+Normal   Created    85m (x2 over 106m)     kubelet  Created container aws-node
+Normal   Pulled     85m                    kubelet  Successfully pulled image "602401143452.dkr.ecr.eu-central-1.amazonaws.com/amazon-k8s-cni:v1.8.0-eksbuild.1" in 158.21763ms
+Normal   Started    85m (x2 over 106m)     kubelet  Started container aws-node
+Warning  Unhealthy  11m (x31 over 106m)    kubelet  Readiness probe failed:
+Warning  Unhealthy  4m57s (x28 over 100m)  kubelet  Liveness probe failed:
+</code></pre><h2 id="what-changes-in-kubernetes-120">What changes in Kubernetes 1.20</h2><p>According to the <a href="https://kubernetes.io/blog/2020/12/08/kubernetes-1-20-release-announcement/">Kubernetes 1.20: The Raddest Release[1]</a>: </p><blockquote>A longstanding bug regarding exec probe timeouts that may impact existing pod definitions has been fixed. Prior to this fix, the field <code>timeoutSeconds</code> was not respected for exec probes. Instead, probes would run indefinitely, even past their configured deadline, until a result was returned. With this change, the default value of <code>1 second</code> will be applied if a value is not specified and existing pod definitions may no longer be sufficient if a probe takes longer than one second.</blockquote><p>This means a bug fix in Kubernetes 1.20:  <a href="https://github.com/kubernetes/enhancements/issues/1972">Fixing Kubelet Exec Probe Timeouts[2]</a> and <a href="https://github.com/kubernetes/enhancements/pull/1973">KEP-1972: kubelet exec probe timeouts[3]</a>. Now the default timeout <code>1s</code> is respected but is periodically too short causing it to fail and pods to restart.</p><h2 id="workaround">Workaround</h2><p>Here are 2 methods to mitigate the issue:</p><ol><li>Disable the feature gate <code>ExecProbeTimeout</code> on <code>kubelet</code>: As a cluster administrator, we can disable the feature gate <code>ExecProbeTimeout</code> (set it to false) on each <code>kubelet</code> to restore the behavior from older versions, then remove that override once all the exec probes in the cluster have a <code>timeoutSeconds</code> value set[4].</li><li>Increase the <code>timeoutSeconds</code> to a proper value: If you have pods that are impacted from the default 1 second timeout, you should update their probe timeout so that you’re ready for the eventual removal of that feature gate.</li></ol><p>For VPC CNI plugin, however, issue <a href="https://github.com/aws/amazon-vpc-cni-k8s/issues/1425">#1425[5]</a> is still considered a bug and needs to be followup.</p><h2 id="reference">Reference</h2><ol><li><a href="https://kubernetes.io/blog/2020/12/08/kubernetes-1-20-release-announcement/">Kubernetes 1.20: The Raddest Release</a></li><li><a href="https://github.com/kubernetes/enhancements/issues/1972">Fixing Kubelet Exec Probe Timeouts</a></li><li><a href="https://github.com/kubernetes/enhancements/pull/1973">KEP-1972: kubelet exec probe timeouts</a>.</li><li><a href="https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/">Configure Liveness, Readiness and Startup Probes</a></li><li><a href="https://github.com/aws/amazon-vpc-cni-k8s/issues/1425">aws-node is restarting (Crashing, exiting on 137) sporadically which causes all pods on that node to stuck on ContainerCreating state. #1425</a></li></ol>

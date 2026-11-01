@@ -1,0 +1,142 @@
+---
+title: "Why my CDK VPC constructor does not respect maximum availability zones"
+slug: "why-my-cdk-vpc-constructor-does-not-repct-availability-zones"
+date: "2022-01-15T19:30:00+08:00"
+lastmod: "2022-01-15T19:30:00+08:00"
+draft: false
+tags: ["cdk", "cloudformation", "aws"]
+authors: ["focaaby"]
+featured: false
+custom_excerpt: "In this article, we'll know the environment variable account and region are requirements for the production CDK stack. Also, StacksPros need to be inherited as well."
+excerpt: "In this article, we'll know the environment variable account and region are requirements for the production CDK stack. Also, StacksPros need to be inherited as well."
+description: "In this article, we'll know the environment variable account and region are requirements for the production CDK stack. Also, StacksPros need to be inherited as well."
+feature_image: "https://images.unsplash.com/photo-1499346030926-9a72daac6c63?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwxMTc3M3wwfDF8c2VhcmNofDN8fGNsb3VkfGVufDB8fHx8MTY0MTkzMjU1Nw&ixlib=rb-1.2.1&q=80&w=2000"
+feature_image_caption: "Photo by <a href=\"https://unsplash.com/@pericakalimerica?utm_source=ghost&utm_medium=referral&utm_campaign=api-credit\">Pero Kalimero</a> / <a href=\"https://unsplash.com/?utm_source=ghost&utm_medium=referral&utm_campaign=api-credit\">Unsplash</a>"
+reading_time: "3 min read"
+---
+<h2 id="problem">Problem</h2><p>In the following code snippet, we configure the maximum number of availability zones(AZs). However, CDK does not respect the value.</p><pre><code>$ cdk --version
+2.5.0 (build 0951122)
+</code></pre><pre><code class="language-bash">$ cat ./bin/vpc-additional-subnet-stack.ts
+#!/usr/bin/env node
+import 'source-map-support/register';
+import * as cdk from 'aws-cdk-lib';
+import { VpcAdditionalSubnetStackStack } from '../lib/vpc-additional-subnet-stack-stack';
+
+const app = new cdk.App();
+new VpcAdditionalSubnetStackStack(app, 'VpcAdditionalSubnetStackStack', {
+
+  env: { account: '111111111111', region: 'eu-west-1' },
+
+});%
+
+</code></pre><pre><code class="language-typescript">import { Stack, StackProps } from 'aws-cdk-lib';
+import { Construct } from 'constructs';
+import * as ec2 from "aws-cdk-lib/aws-ec2";
+
+export class VpcAdditionalSubnetStackStack extends Stack {
+  constructor(scope: Construct, id: string, props?: StackProps) {
+    super(scope, id);
+
+    const subnetConfig = [
+      {
+          cidrMask: 22,
+          name: "outputSubnet",
+          subnetType: ec2.SubnetType.PUBLIC,
+      },
+      {
+          cidrMask: 22,
+          name: "database",
+          subnetType: ec2.SubnetType.PRIVATE_WITH_NAT,
+      },
+      {
+          cidrMask: 22,
+          name: "application",
+          subnetType: ec2.SubnetType.PRIVATE_WITH_NAT,
+      },
+    ];
+
+    // VPC
+    const vpc = new ec2.Vpc(this, "Lab-VPC", {
+      cidr: "10.0.0.0/16",
+      maxAzs: 3,
+      subnetConfiguration: subnetConfig,
+    });
+
+  }
+}
+</code></pre><p>Also, we can view there are 3 AZs in <code>eu-west-1</code> region.</p><pre><code>$ aws ec2 describe-availability-zones
+
+{
+    "AvailabilityZones": [
+        {
+            "State": "available",
+            "OptInStatus": "opt-in-not-required",
+            "Messages": [],
+            "RegionName": "eu-west-1",
+            "ZoneName": "eu-west-1a",
+            "ZoneId": "euw1-az1",
+            "GroupName": "eu-west-1",
+            "NetworkBorderGroup": "eu-west-1",
+            "ZoneType": "availability-zone"
+        },
+        {
+            "State": "available",
+            "OptInStatus": "opt-in-not-required",
+            "Messages": [],
+            "RegionName": "eu-west-1",
+            "ZoneName": "eu-west-1b",
+            "ZoneId": "euw1-az2",
+            "GroupName": "eu-west-1",
+            "NetworkBorderGroup": "eu-west-1",
+            "ZoneType": "availability-zone"
+        },
+        {
+            "State": "available",
+            "OptInStatus": "opt-in-not-required",
+            "Messages": [],
+            "RegionName": "eu-west-1",
+            "ZoneName": "eu-west-1c",
+            "ZoneId": "euw1-az3",
+            "GroupName": "eu-west-1",
+            "NetworkBorderGroup": "eu-west-1",
+            "ZoneType": "availability-zone"
+        }
+    ]
+}
+</code></pre><h2 id="dive-into-the-problem">Dive into the problem</h2><p>According to the <a href="https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib.Stack.html#availabilityzones">Stack.availabilityZones</a>:</p><blockquote>If the stack is environment-agnostic (either account and/or region are tokens), this property will return an array with 2 tokens that will resolve at deploy-time to the first two availability zones returned from CloudFormation's <code>Fn::GetAZs</code> intrinsic function.</blockquote><p>From the code snippet, we had already set up the account and region. It seems that the Stack does not inherit the environment. Thus, we can check the account and region of Stack again as the following snippet.</p><pre><code>export class VpcAdditionalSubnetStackStack extends Stack {
+  constructor(scope: Construct, id: string, props?: StackProps) {
+    super(scope, id, props);
+    console.log('account: ', Stack.of(this).account);
+    console.log('region: ', Stack.of(this).region);
+    console.log('availability zones', Stack.of(this).availabilityZones);
+</code></pre><pre><code>$ cdk synth
+account:  ${Token[AWS.AccountId.6]}
+region:  ${Token[AWS.Region.10]}
+availability zones [ '${Token[TOKEN.200]}', '${Token[TOKEN.202]}' ]
+...
+... 
+</code></pre><p>AWS CDK encodes a token whose value is not yet known at construction time[2]. We can know the environment variables are not been used in <code>VpcAdditionalSubnetStackStack</code> Stack.</p><pre><code>    super(scope, id);
+</code></pre><p>From the code snippet, which does not pass <code>props</code> in the call to<code>super()</code>, and the environment variable we pass when creating <code>VpcAdditionalSubnetStackStack</code> is ignored. Therefore, CDK considers this to be environment-agnostic and creates only 2 AZ.</p><pre><code>$ cat ./lib/vpc-additional-subnet-stack-stack.ts
+import { Stack, StackProps } from 'aws-cdk-lib';
+import { Construct } from 'constructs';
+// import * as sqs from 'aws-cdk-lib/aws-sqs';
+
+export class VpcAdditionalSubnetStackStack extends Stack {
+  constructor(scope: Construct, id: string, props?: StackProps) {
+    super(scope, id, props);
+
+    // The code that defines your stack goes here
+
+    // example resource
+    // const queue = new sqs.Queue(this, 'VpcAdditionalSubnetStackQueue', {
+    //   visibilityTimeout: cdk.Duration.seconds(300)
+    // });
+  }
+}
+</code></pre><p>By default, the CDK helps us pull a template that defines the basic constructor. Here is the example template:</p><pre><code>    super(scope, id, props);
+</code></pre><pre><code>$ cdk synth
+account:  111111111111
+region:  eu-west-1
+availability zones [ 'eu-west-1a', 'eu-west-1b', 'eu-west-1c' ]
+...
+</code></pre><p>After updating the <code>super()</code> function, we can view the account and region output.</p><h2 id="summary">Summary</h2><p>In order to create the availability zones of an AWS region, we must set up the following items:</p><ul><li>Environment variable for <code>account</code> and <code>region</code>, it can be set up via AWS credential or <code>env</code> property.</li><li>Confirm the Stack inherits the<code>StackProps</code>, if not the stack will ignore the environment variable we set up in previous steps.</li></ul><h2 id="references">References</h2><ol><li><a href="https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib.aws_ec2-readme.html#advanced-subnet-configuration">https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib.aws_ec2-readme.html#advanced-subnet-configuration</a></li><li>Tokens - <a href="https://docs.aws.amazon.com/zh_cn/cdk/v2/guide/tokens.html">https://docs.aws.amazon.com/zh_cn/cdk/v2/guide/tokens.html</a></li><li><a href="https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib.Stack.html#availabilityzones">https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib.Stack.html#availabilityzones</a></li><li><a href="https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib.StackProps.html#env">https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib.StackProps.html#env</a></li></ol>

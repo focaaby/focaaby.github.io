@@ -1,0 +1,96 @@
+---
+title: "為什麼 kubectl 可以訪問 EKS cluster"
+slug: "why-kubectl-can-access-eks-cluster-with-iam"
+date: "2022-09-17T00:55:00+08:00"
+lastmod: "2022-09-20T05:39:50+08:00"
+draft: false
+tags: ["ironman-2022", "eks", "kubernetes"]
+authors: ["focaaby"]
+featured: false
+custom_excerpt: "本文將探討這兩個問題「為什麼原生的 kubectl 可以直接訪問 EKS cluster」以及「為什麼 AWS CLI 權限與訪問 EKS cluster」，希望理解在 kubectl 如何與 IAM 權限整合允許訪問 EKS cluster。"
+excerpt: "本文將探討這兩個問題「為什麼原生的 kubectl 可以直接訪問 EKS cluster」以及「為什麼 AWS CLI 權限與訪問 EKS cluster」，希望理解在 kubectl 如何與 IAM 權限整合允許訪問 EKS cluster。"
+description: "本文將探討這兩個問題「為什麼原生的 kubectl 可以直接訪問 EKS cluster」以及「為什麼 AWS CLI 權限與訪問 EKS cluster」，希望理解在 kubectl 如何與 IAM 權限整合允許訪問 EKS cluster。"
+feature_image: "https://images.unsplash.com/photo-1533738363-b7f9aef128ce?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwxMTc3M3wwfDF8c2VhcmNofDR8fGNhdHxlbnwwfHx8fDE2NjMxNzA0MTQ&ixlib=rb-1.2.1&q=80&w=2000"
+feature_image_caption: "Photo by <a href=\"https://unsplash.com/@raouldroog?utm_source=ghost&utm_medium=referral&utm_campaign=api-credit\">Raoul Droog</a> / <a href=\"https://unsplash.com/?utm_source=ghost&utm_medium=referral&utm_campaign=api-credit\">Unsplash</a>"
+reading_time: "6 min read"
+---
+<p>根據 EKS 文件 <a href="https://docs.aws.amazon.com/eks/latest/userguide/install-kubectl.html">Installing or updating kubectl</a> [1]，或是 <a href="https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/">Kubernetes 官方安裝 kubectl 文件</a> [2] 皆是直接安裝 kubectl binary 並設置相應 Linux 路徑及權限即可以直接使用。</p><p>而 EKS 前置作業則需要設置 AWS CLI 權限，那「為什麼原生的 kubectl 可以直接訪問 EKS cluster」以及「為什麼 AWS CLI 權限與訪問 EKS cluster」，本文將探討這兩個問題，希望理解在 kubectl 如何與 IAM 權限整合允許訪問 EKS cluster。</p><h2 id="aws-iam-authenticator">AWS IAM Authenticator</h2><p>EKS 文件並未提及 kubectl 所需最低版本，而在檢視 <a href="https://github.com/weaveworks/eksctl"><code>eksctl</code></a> [3] GitHub 頁面說明提及需搭配 AWS CLI（<code>aws eks get-token</code>）或是使用 <a href="https://github.com/kubernetes-sigs/aws-iam-authenticator">AWS IAM Authenticator for Kubernetes</a> [4]。</p><p><a href="https://github.com/kubernetes-sigs/aws-iam-authenticator">AWS IAM Authenticator for Kubernetes</a> 提供使用 AWS IAM credentials 可以向 Kubernetes cluster 進行身份驗證（authenticate）的工具。</p><p>若希望 Kubernetes 在 AWS 環境上支援 IAM Authenticator，需要以下五個步驟：</p><ol><li>建立 IAM 角色（role）</li><li>以 DaemonSet 方式執行 Authenticator server</li><li>設定 Kubernetes API  Server 與 Authenticator server 整合</li><li>創建 IAM role/user 到 Kubernetes user/group 對照</li><li>設定 kubectl 使用 AWS IAM Authenticator 所提供的 authentication tokens</li></ol><p>有趣的是，其中在對照 IAM role/user 致 Kubernetes user/group 所使用的正是 <a href="https://docs.aws.amazon.com/eks/latest/userguide/add-user-role.html#aws-auth-users">EKS 文件</a> [5] 所提及使用的 EKS-style <code>kube-system/aws-auth</code> ConfigMap。以下為預設 eksctl 建立時會自動將 EKS worker node IAM role 關聯至此 <code>kube-system/aws-auth</code> ConfigMap。</p><pre><code>$ kubectl -n kube-system get cm aws-auth -o yaml
+apiVersion: v1
+data:
+  mapRoles: |
+    - groups:
+      - system:bootstrappers
+      - system:nodes
+      rolearn: arn:aws:iam::111111111111:role/eksctl-ironman-2022-nodegroup-ng1-publ-NodeInstanceRole-HN27OZ18JS6U
+      username: system:node:{{EC2PrivateDNSName}}
+kind: ConfigMap
+metadata:
+  creationTimestamp: "2022-09-14T09:56:19Z"
+  name: aws-auth
+  namespace: kube-system
+  resourceVersion: "2011"
+  uid: f4cb3fae-17ef-421d-871c-5be15efbe73f
+</code></pre><p>進一步查看 <a href="https://docs.aws.amazon.com/eks/latest/userguide/control-plane-logs.html">EKS control plane logging</a> [6] 文件，我們也可以更近一步確認 EKS 除了以下原生元件 logs 之外，提供了</p><ul><li>Kubernetes API server</li><li>Audit</li><li>Controller manager</li><li>Scheduler</li><li>Authenticator (authenticator) – Authenticator logs 為 EKS 環境獨有。這些 logs 代表 EKS 使用 IAM 憑證進行 Kubernetes <a href="https://kubernetes.io/docs/admin/authorization/rbac/">RBAC</a> 身分驗證的 control plane 元件。</li></ul><h2 id="%E9%A9%97%E8%AD%89">驗證</h2><h3 id="kubectl">kubectl</h3><p>一般來說，<code>kubectl</code> 命令設定文建會儲存於 <code>~/.kube/config</code>，透過 <code>eksctl</code> 命令建立 cluster 時也會自動生成此文件。在 kubeconfig 設定檔，使用了 <code>users.user.exec</code> 命令並調用外部 AWS CLI 命令。</p><pre><code>$ cat ~/.kube/config
+apiVersion: v1
+clusters:
+... 
+... SKIPPING certificate-authority-data INFORMATION ... 
+...
+current-context: arn:aws:eks:eu-west-1:111111111111:cluster/ironman-2022
+kind: Config
+preferences: {}
+users:
+- name: cli@ironman-2022.eu-west-1.eksctl.io
+  user:
+    exec:
+      apiVersion: client.authentication.k8s.io/v1alpha1
+      args:
+      - eks
+      - get-token
+      - --cluster-name
+      - ironman-2022
+      - --region
+      - eu-west-1
+      command: aws
+</code></pre><p>在 Kubernetes 1.10 alpha <code>k8s.io/client-go</code> library 支援了 <a href="https://github.com/kubernetes/kubernetes/pull/59495">exec-based credential providers</a> [7]。而 <code>kubectl</code> 及 <code>kubectl</code> 命令正式使用相同 <code>k8s.io/client-go</code> library。</p><p>同時，我們也可以得知若 client 端使用 client-go credential plugins 方式與 API server 進行認證，有以下流程：</p><ul><li>使用者發出 kubectl 命令</li><li>調用外部 credentials 並與外部服務取得 token</li><li>Credential plugin 取得 token 後返回給 client-go client，並使用 token 訪問 API server</li><li>API Server 使用  webhook token authenticator 元件向外部服務發出 TokenReview 請求。</li><li>外部服務驗證 token 上的 signature 後，返回 Kubernetes user name 及 group</li></ul><p>因此我們也可以透過 <code>aws eks get-token</code> 命令查看此 token：</p><pre><code>$ aws eks get-token --cluster ironman-2022 | jq .
+{
+  "kind": "ExecCredential",
+  "apiVersion": "client.authentication.k8s.io/v1beta1",
+  "spec": {},
+  "status": {
+    "expirationTimestamp": "2022-09-14T23:04:55Z",
+    "token": "k8s-aws-v1.aHR0cHM6Ly9zdHMuZXUtd2VzdC0xLmFtYXpvbmF3cy5jb20vP0FjdGlvbj1HZXRDYWxsZXJJZGVudGl0eSZWZXJzaW9uPTIwMTEtMDYtMTUmWC1BbXotQWxnb3JpdGhtPUFXUzQtSE1BQy1TSEEyNTYmWC1BbXotQ3JlZGVudGlhbD1BS0lBWUZNUVNOU0U1SDVaVEpERSUyRjIwMjIwOTE0JTJGZXUtd2VzdC0xJTJGc3RzJTJGYXdzNF9yZXF1ZXN0JlgtQW16LURhdGU9MjAyMjA5MTRUMjI1MDU1WiZYLUFtei1FeHBpcmVzPTYwJlgtQW16LVNpZ25lZEhlYWRlcnM9aG9zdCUzQngtazhzLWF3cy1pZCZYLUFtei1TaWduYXR1cmU9MDU5ZjQwNzEzNTY0OGYwNjdlMWZjOThjZjhhYmY3YjdkMmIzNDgxMjE1ZWEzNGE1NTI4YzcyODczMmU1YjJkYw"
+  }
+}
+</code></pre><p>每個 token 皆是 <a href="https://github.com/kubernetes-sigs/aws-iam-authenticator#api-authorization-from-outside-a-cluster">AWS IAM Authenticator</a> 定義以 <code>k8s-aws-v1.</code> 字串為前綴，並接續使用 base64 encoded string，故透過 base64 命令解析出 STS presigned URL[9]：</p><pre><code>$ aws eks get-token --cluster ironman-2022 | jq -r .status.token | awk -F. '{print $2}' | base64 -d
+https://sts.eu-west-1.amazonaws.com/?Action=GetCallerIdentity&amp;Version=2011-06-15&amp;X-Amz-Algorithm=AWS4-HMAC-SHA256&amp;X-Amz-Credential=AKIAYFMQSNSE5H5ZTJDE%2F20220914%2Feu-west-1%2Fsts%2Faws4_request&amp;X-Amz-Date=20220914T225747Z&amp;X-Amz-Expires=60&amp;X-Amz-SignedHeaders=host%3Bx-k8s-aws-id&amp;X-Amz-Signature=9688c99e7abd33807bc7b3af3542a59235e501a0d9c807100707410fc3da5d33
+</code></pre><h3 id="control-plane">Control plane</h3><p>透過以下 CloudWatch Log Syntax 可查看 <code>kube-apiserver</code> 所使用 Flag：</p><pre><code>filter @logStream not like /^kube-apiserver-audit/
+ | filter @logStream like /^kube-apiserver-/
+ | fields @timestamp, @message
+ | sort @timestamp asc
+ | filter @message like "--authentication"
+ | limit 10000
+</code></pre><p>kube-apiserver logs 定義了 <code>--authentication-token-webhook-config-file</code> 則代表使用了 <a href="https://kubernetes.io/docs/reference/access-authn-authz/authentication/#webhook-token-authentication">Webhook Token Authentication</a> [10] ，但非常遺憾的是我們無法查看到 API Server 元件內定義目錄查看細節。<code>/etc/kubernetes/authenticator/apiserver-webhook-kubeconfig.yaml</code>。</p><pre><code>I0914 09:46:06.295581 10 flags.go:59] FLAG: --authentication-token-webhook-cache-ttl="7m0s"
+I0914 09:46:06.295687 10 flags.go:59] FLAG: --authentication-token-webhook-config-file="/etc/kubernetes/authenticator/apiserver-webhook-kubeconfig.yaml"
+I0914 09:46:06.295703 10 flags.go:59] FLAG: --authentication-token-webhook-version="v1beta1"
+</code></pre><p>此外，一樣透過  CloudWatch Log Syntax 查看 <code>authenticator</code> log，也能觀察到相同的設置及 logs：</p><pre><code>filter @logStream like /^authenticator/
+ | fields @timestamp, @message
+ | sort @timestamp asc
+ | filter @message like "--authentication-token-webhook-config-file"
+ | limit 10000
+</code></pre><pre><code>time="2022-09-14T09:46:01Z" level=info msg="reconfigure your apiserver with `--authentication-token-webhook-config-file=/etc/kubernetes/authenticator/apiserver-webhook-kubeconfig.yaml` to enable (assuming default hostPath mounts)"
+</code></pre><h2 id="%E7%B8%BD%E7%B5%90">總結</h2><p>原生 kubectl 使用了 <code>k8s.io/client-go</code> library，並在 Kubernetes 1.10 版本開始支援 exec 命令使用外部 credentials，而在 API server 則設定了使用  webhook token authenticator 方式設定 AWS IAM Authenticator 整合 IAM STS 服務驗證 IAM 使用者，STS endpoint 驗證後交由 Kubernetes API server 讀取 <code>kube-system/aws-auth</code> ConfigMap 對照 Kubernetes 使用 RBAC groups，最終返回結果。</p><p>了解上述 <code>aws eks get-token</code> 為 Kubernetes Bearer Token，故我們也可以直接透過 curl 命令搭配此 token 訪問 EKS cluster endpoint。</p><pre><code>$ TOKEN=$(aws eks get-token --cluster ironman-2022 | jq -r .status.token)
+$ APISERVER=$(aws eks describe-cluster --name ironman-2022 | jq -r .cluster.endpoint) 
+$ curl $APISERVER/api --header "Authorization: Bearer $TOKEN" --insecure
+{
+  "kind": "APIVersions",
+  "versions": [
+    "v1"
+  ],
+  "serverAddressByClientCIDRs": [
+    {
+      "clientCIDR": "0.0.0.0/0",
+      "serverAddress": "ip-10-0-51-57.eu-west-1.compute.internal:443"
+    }
+  ]
+</code></pre><h2 id="%E5%8F%83%E8%80%83%E6%96%87%E4%BB%B6">參考文件</h2><ol><li>Installing or updating kubectl - <a href="https://docs.aws.amazon.com/eks/latest/userguide/install-kubectl.html">https://docs.aws.amazon.com/eks/latest/userguide/install-kubectl.html</a></li><li>Install and Set Up kubectl on Linux  | Kubernetes Documentation -  <a href="https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/">https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/</a></li><li>eksctl - The official CLI for Amazon EKS -  <a href="https://github.com/weaveworks/eksctl">https://github.com/weaveworks/eksctl</a></li><li>AWS IAM Authenticator for Kubernetes - <a href="https://github.com/kubernetes-sigs/aws-iam-authenticator">https://github.com/kubernetes-sigs/aws-iam-authenticator</a>.</li><li>Enabling IAM user and role access to your cluster - Add IAM users or roles to your Amazon EKS cluster - <a href="https://docs.aws.amazon.com/eks/latest/userguide/add-user-role.html#aws-auth-users">https://docs.aws.amazon.com/eks/latest/userguide/add-user-role.html#aws-auth-users</a></li><li>Amazon EKS control plane logging - <a href="https://docs.aws.amazon.com/eks/latest/userguide/control-plane-logs.html">https://docs.aws.amazon.com/eks/latest/userguide/control-plane-logs.html</a></li><li>client-go: add an exec-based client auth provider #59495 - <a href="https://github.com/kubernetes/kubernetes/pull/59495">https://github.com/kubernetes/kubernetes/pull/59495</a></li><li>client-go credential plugins  | Authenticating  - <a href="https://kubernetes.io/docs/reference/access-authn-authz/authentication/#client-go-credential-plugins">https://kubernetes.io/docs/reference/access-authn-authz/authentication/#client-go-credential-plugins</a></li><li><a href="https://github.com/kubernetes-sigs/aws-iam-authenticator#api-authorization-from-outside-a-cluster">https://github.com/kubernetes-sigs/aws-iam-authenticator#api-authorization-from-outside-a-cluster</a></li><li>Webhook Token Authentication  | Authenticating - <a href="https://kubernetes.io/docs/reference/access-authn-authz/authentication/#webhook-token-authentication">https://kubernetes.io/docs/reference/access-authn-authz/authentication/#webhook-token-authentication</a></li></ol>

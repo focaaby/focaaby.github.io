@@ -1,0 +1,47 @@
+baseURL = "https://focaaby.com/"
+title = "focaaby's Notes"
+locale = "en"
+timeZone = "Asia/Singapore"
+hasCJKLanguage = true
+enableRobotsTXT = true
+disableKinds = ["taxonomy", "section"]
+
+[pagination]
+  pagerSize = 25
+  path = "page"
+
+[taxonomies]
+  tag = "tags"
+  author = "authors"
+
+[permalinks]
+  [permalinks.page]
+    posts = "/:slug/"
+  [permalinks.term]
+    tags = "/tag/:slug/"
+    authors = "/author/:slug/"
+
+[markup.goldmark.renderer]
+  unsafe = true
+
+[outputs]
+  home = ["html", "rss"]
+  term = ["html", "rss"]
+  page = ["html"]
+
+[services.rss]
+  limit = 15
+
+[params]
+  description = "趨勢不可擋，流行不可跟，探索與思考技術的本質"
+  cover_image = "/content/images/2021/10/zen-maldives-MrUYVvmTVC0-unsplash.jpg"
+  facebook = "focaaby"
+  twitter = "@focaaby"
+  accent_color = "#306962"
+  ga_id = "G-X4XH8Z193H"
+  adsense_client = "ca-pub-5527159147581280"
+  utterances_repo = "focaaby/focaaby.github.io"
+
+# Ghost-exported posts are stored as raw HTML content files
+[security]
+  allowContent = ['^text/html$', '^text/markdown$']

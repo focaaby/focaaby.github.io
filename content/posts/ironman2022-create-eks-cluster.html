@@ -1,0 +1,148 @@
+---
+title: "建立 EKS Cluster"
+slug: "ironman2022-create-eks-cluster"
+date: "2022-09-16T00:55:00+08:00"
+lastmod: "2022-09-19T22:56:46+08:00"
+draft: false
+tags: ["ironman-2022", "eks", "aws", "kubernetes"]
+authors: ["focaaby"]
+featured: false
+custom_excerpt: "故本系列文章希望研究在 AWS 平台上 EKS 一些有趣的功能是如何實現，並且了解 EKS 如何整合上游 Kubernetes 功能與 AWS 服務整合。"
+excerpt: "故本系列文章希望研究在 AWS 平台上 EKS 一些有趣的功能是如何實現，並且了解 EKS 如何整合上游 Kubernetes 功能與 AWS 服務整合。"
+description: "故本系列文章希望研究在 AWS 平台上 EKS 一些有趣的功能是如何實現，並且了解 EKS 如何整合上游 Kubernetes 功能與 AWS 服務整合。"
+feature_image: "https://images.unsplash.com/photo-1584290867415-527a8475726d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwxMTc3M3wwfDF8c2VhcmNofDY1fHxjYXR8ZW58MHx8fHwxNjYzMTcwNDQz&ixlib=rb-1.2.1&q=80&w=2000"
+feature_image_caption: "Photo by <a href=\"https://unsplash.com/@stevetsang?utm_source=ghost&utm_medium=referral&utm_campaign=api-credit\">Steve Tsang</a> / <a href=\"https://unsplash.com/?utm_source=ghost&utm_medium=referral&utm_campaign=api-credit\">Unsplash</a>"
+reading_time: "7 min read"
+---
+<h2 id="%E5%89%8D%E8%A8%80">前言</h2><p>根據 Kubernetes 官方公告[1]，Kubernetes 發布週期約為 15 週一次，換言之每接近 4 個月就會發布一次新的版本。而其中 Cloud Provider 所提供的 Kubernetes 平台也必須持續更新，可以說是每隔三至五個月皆會有一次新的發布，如 GKE[2] 及 EKS[3] 發布頻率。</p><p></p><p>因此我們也能觀察到 GKE [2]及 EKS [4][5] 於文件上頻繁更新，並基於上游 Kubernetes 引入新的功能，進而整合 Cloud Provider 特性。</p><p></p><p>故本系列文章希望研究在 AWS 平台上 EKS 一些有趣的功能是如何實現，究竟哪些事情是 EKS 官方文件上並未提及的事情，如 kubectl 如何使用 IAM user 權限整合 EKS、EKS worker node 如何自動加入 cluster，最終了解 EKS 如何整合上游 Kubernetes 功能與 AWS 服務整合。</p><h2 id="%E5%BB%BA%E7%AB%8B-eks-cluster-%E7%92%B0%E5%A2%83">建立 EKS Cluster 環境</h2><p>本系列文章將會使用<code>eksctl</code> 管理 EKS Cluster，以下為建立 EKS 步驟，及使用相關命令版本。</p><ol><li>啟用 EC2 並選用 AMI Amazon Linux 2 Kernel 5.10 AMI 作為控制 EKS Cluster 主機。</li><li>安裝 AWS CLI[6]。</li></ol><pre><code>$ curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+100 44.8M  100 44.8M    0     0  69.0M      0 --:--:-- --:--:-- --:--:-- 68.9M
+
+$ unzip awscliv2.zip
+
+$ sudo ./aws/install
+
+$ aws --version
+aws-cli/2.4.27 Python/3.8.8 Linux/4.14.290-217.505.amzn2.x86_64 exe/x86_64.amzn.2 prompt/off
+</code></pre><p>3. 安裝 <code>eksctl</code> [7] 命令。</p><pre><code>$ curl --silent --location "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_$(uname -s)_amd64.tar.gz" | tar xz -C /tmp
+
+$ sudo mv /tmp/eksctl /usr/local/bin
+
+$ eksctl version
+0.111.0
+</code></pre><p>4. 當前 <code>eksctl</code> 預設版本為 1.22 版本[8]，故安裝 kubectl 1.22 版本[9]。</p><pre><code>$ curl -LO https://dl.k8s.io/release/v1.22.13/bin/linux/amd64/kubectl
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100   138  100   138    0     0    836      0 --:--:-- --:--:-- --:--:--   841
+100 44.7M  100 44.7M    0     0  82.8M      0 --:--:-- --:--:-- --:--:-- 82.8M
+
+$ sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+
+$ kubectl version
+Kubeconfig user entry is using deprecated API version client.authentication.k8s.io/v1alpha1. Run 'aws eks update-kubeconfig' to update.
+Client Version: version.Info{Major:"1", Minor:"22", GitVersion:"v1.22.13", GitCommit:"a43c0904d0de10f92aa3956c74489c45e6453d6e", GitTreeState:"clean", BuildDate:"2022-08-17T18:28:56Z", GoVersion:"go1.16.15", Compiler:"gc", Platform:"linux/amd64"}
+Server Version: version.Info{Major:"1", Minor:"22+", GitVersion:"v1.22.12-eks-6d3986b", GitCommit:"dade57bbf0e318a6492808cf6e276ea3956aecbf", GitTreeState:"clean", BuildDate:"2022-07-20T22:06:30Z", GoVersion:"go1.16.15", Compiler:"gc", Platform:"linux/amd64"}
+</code></pre><p>5. 設置 AWS CLI 憑證（credentials）[10]。eksctl 將會使用此 IAM 使用者權限作為 EKS Cluster 建立者（creator），並建立 EKS Cluster、節點組（nodegroup）等 AWS 資源。倘若希望 IAM 使用者可以限縮 IAM 最低權限，可以參考 eksctl 最小 IAM policies 文件[11]</p><pre><code>$ aws configure
+</code></pre><p>6. 建立 <code>eksctl</code> ClusterConfig 文件，並啟用 control plane logs[12]。</p><pre><code>$ cat ./ironman-2022.yaml
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+metadata:
+  name: ironman-2022
+  region: eu-west-1
+
+managedNodeGroups:
+  - name: "ng1-public-ssh"
+    desiredCapacity: 2
+    ssh:
+      # Enable ssh access (via the admin container)
+      allow: true
+      publicKeyName: "ironman-2022"
+    iam:
+      withAddonPolicies:
+        ebs: true
+        fsx: true
+        efs: true
+        awsLoadBalancerController: true
+        autoScaler: true
+
+iam:
+  withOIDC: true
+
+cloudWatch:
+  clusterLogging:
+    enableTypes: ["*"]
+
+$ eksctl create cluster -f ./ironman-2022.yaml                                                                                                                                                                      [133/4203]
+2022-09-14 09:39:32 [ℹ]  eksctl version 0.111.0
+2022-09-14 09:39:32 [ℹ]  using region eu-west-1
+2022-09-14 09:39:32 [ℹ]  setting availability zones to [eu-west-1a eu-west-1c eu-west-1b]
+2022-09-14 09:39:32 [ℹ]  subnets for eu-west-1a - public:192.168.0.0/19 private:192.168.96.0/19
+2022-09-14 09:39:32 [ℹ]  subnets for eu-west-1c - public:192.168.32.0/19 private:192.168.128.0/19
+2022-09-14 09:39:32 [ℹ]  subnets for eu-west-1b - public:192.168.64.0/19 private:192.168.160.0/19
+2022-09-14 09:39:32 [ℹ]  nodegroup "ng1-public-ssh" will use "" [AmazonLinux2/1.22]
+2022-09-14 09:39:32 [ℹ]  using EC2 key pair "ironman-2022"
+2022-09-14 09:39:32 [ℹ]  using Kubernetes version 1.22
+2022-09-14 09:39:32 [ℹ]  creating EKS cluster "ironman-2022" in "eu-west-1" region with managed nodes
+2022-09-14 09:39:32 [ℹ]  1 nodegroup (ng1-public-ssh) was included (based on the include/exclude rules)
+2022-09-14 09:39:32 [ℹ]  will create a CloudFormation stack for cluster itself and 0 nodegroup stack(s)
+2022-09-14 09:39:32 [ℹ]  will create a CloudFormation stack for cluster itself and 1 managed nodegroup stack(s)
+2022-09-14 09:39:32 [ℹ]  if you encounter any issues, check CloudFormation console or try 'eksctl utils describe-stacks --region=eu-west-1 --cluster=ironman-2022'
+2022-09-14 09:39:32 [ℹ]  Kubernetes API endpoint access will use default of {publicAccess=true, privateAccess=false} for cluster "ironman-2022" in "eu-west-1"
+2022-09-14 09:39:32 [ℹ]  configuring CloudWatch logging for cluster "ironman-2022" in "eu-west-1" (enabled types: api, audit, authenticator, controllerManager, scheduler &amp; no types disabled)
+2022-09-14 09:39:32 [ℹ]
+2 sequential tasks: { create cluster control plane "ironman-2022",
+    2 sequential sub-tasks: {
+        4 sequential sub-tasks: {
+            wait for control plane to become ready,
+            associate IAM OIDC provider,
+            2 sequential sub-tasks: {
+                create IAM role for serviceaccount "kube-system/aws-node",
+                create serviceaccount "kube-system/aws-node",
+            },
+            restart daemonset "kube-system/aws-node",
+        },
+        create managed nodegroup "ng1-public-ssh",
+    }
+}
+2022-09-14 09:39:32 [ℹ]  building cluster stack "eksctl-ironman-2022-cluster"
+2022-09-14 09:39:33 [ℹ]  deploying stack "eksctl-ironman-2022-cluster"
+2022-09-14 09:40:03 [ℹ]  waiting for CloudFormation stack "eksctl-ironman-2022-cluster"
+2022-09-14 09:40:33 [ℹ]  waiting for CloudFormation stack "eksctl-ironman-2022-cluster"
+2022-09-14 09:41:33 [ℹ]  waiting for CloudFormation stack "eksctl-ironman-2022-cluster"
+2022-09-14 09:42:33 [ℹ]  waiting for CloudFormation stack "eksctl-ironman-2022-cluster"
+2022-09-14 09:43:33 [ℹ]  waiting for CloudFormation stack "eksctl-ironman-2022-cluster"
+2022-09-14 09:44:33 [ℹ]  waiting for CloudFormation stack "eksctl-ironman-2022-cluster"
+2022-09-14 09:45:33 [ℹ]  waiting for CloudFormation stack "eksctl-ironman-2022-cluster"
+2022-09-14 09:46:33 [ℹ]  waiting for CloudFormation stack "eksctl-ironman-2022-cluster"
+2022-09-14 09:47:33 [ℹ]  waiting for CloudFormation stack "eksctl-ironman-2022-cluster"
+2022-09-14 09:48:33 [ℹ]  waiting for CloudFormation stack "eksctl-ironman-2022-cluster"
+2022-09-14 09:49:33 [ℹ]  waiting for CloudFormation stack "eksctl-ironman-2022-cluster"
+2022-09-14 09:50:33 [ℹ]  waiting for CloudFormation stack "eksctl-ironman-2022-cluster"
+2022-09-14 09:51:33 [ℹ]  waiting for CloudFormation stack "eksctl-ironman-2022-cluster"
+2022-09-14 09:53:34 [ℹ]  building iamserviceaccount stack "eksctl-ironman-2022-addon-iamserviceaccount-kube-system-aws-node"
+2022-09-14 09:53:35 [ℹ]  deploying stack "eksctl-ironman-2022-addon-iamserviceaccount-kube-system-aws-node"
+2022-09-14 09:53:35 [ℹ]  waiting for CloudFormation stack "eksctl-ironman-2022-addon-iamserviceaccount-kube-system-aws-node"
+2022-09-14 09:54:05 [ℹ]  waiting for CloudFormation stack "eksctl-ironman-2022-addon-iamserviceaccount-kube-system-aws-node"
+2022-09-14 09:54:05 [ℹ]  serviceaccount "kube-system/aws-node" already exists
+2022-09-14 09:54:05 [ℹ]  updated serviceaccount "kube-system/aws-node"
+2022-09-14 09:54:05 [ℹ]  daemonset "kube-system/aws-node" restarted
+2022-09-14 09:54:05 [ℹ]  building managed nodegroup stack "eksctl-ironman-2022-nodegroup-ng1-public-ssh"
+2022-09-14 09:54:05 [ℹ]  deploying stack "eksctl-ironman-2022-nodegroup-ng1-public-ssh"
+2022-09-14 09:54:05 [ℹ]  waiting for CloudFormation stack "eksctl-ironman-2022-nodegroup-ng1-public-ssh"
+2022-09-14 09:54:35 [ℹ]  waiting for CloudFormation stack "eksctl-ironman-2022-nodegroup-ng1-public-ssh"
+2022-09-14 09:55:18 [ℹ]  waiting for CloudFormation stack "eksctl-ironman-2022-nodegroup-ng1-public-ssh"
+2022-09-14 09:56:04 [ℹ]  waiting for CloudFormation stack "eksctl-ironman-2022-nodegroup-ng1-public-ssh"
+2022-09-14 09:57:24 [ℹ]  waiting for CloudFormation stack "eksctl-ironman-2022-nodegroup-ng1-public-ssh"
+2022-09-14 09:59:10 [ℹ]  waiting for CloudFormation stack "eksctl-ironman-2022-nodegroup-ng1-public-ssh"
+2022-09-14 09:59:10 [ℹ]  waiting for the control plane availability...
+2022-09-14 09:59:12 [✔]  saved kubeconfig as "/home/ec2-user/.kube/config"
+2022-09-14 09:59:12 [ℹ]  no tasks
+2022-09-14 09:59:12 [✔]  all EKS cluster resources for "ironman-2022" have been created
+2022-09-14 09:59:12 [ℹ]  nodegroup "ng1-public-ssh" has 2 node(s)
+2022-09-14 09:59:12 [ℹ]  node "ip-192-168-29-179.eu-west-1.compute.internal" is ready
+2022-09-14 09:59:12 [ℹ]  node "ip-192-168-78-165.eu-west-1.compute.internal" is ready
+2022-09-14 09:59:12 [ℹ]  waiting for at least 2 node(s) to become ready in "ng1-public-ssh"
+</code></pre><h2 id="%E5%8F%83%E8%80%83%E6%96%87%E4%BB%B6">參考文件</h2><ol><li>Kubernetes Release Cadence Change: Here’s What You Need To Know - <a href="https://kubernetes.io/blog/2021/07/20/new-kubernetes-release-cadence">https://kubernetes.io/blog/2021/07/20/new-kubernetes-release-cadence</a></li><li>Amazon EKS Kubernetes versions - Amazon EKS Kubernetes release calendar - <a href="https://docs.aws.amazon.com/eks/latest/userguide/kubernetes-versions.html#kubernetes-release-calendar">https://docs.aws.amazon.com/eks/latest/userguide/kubernetes-versions.html#kubernetes-release-calendar</a></li><li>GKE release notes -<a href="https://cloud.google.com/kubernetes-engine/docs/release-notes">https://cloud.google.com/kubernetes-engine/docs/release-notes</a></li><li>Document history for Amazon EKS - <a href="https://docs.aws.amazon.com/eks/latest/userguide/doc-history.html">https://docs.aws.amazon.com/eks/latest/userguide/doc-history.html</a></li><li>Amazon EKS User Guide - <a href="https://github.com/awsdocs/amazon-eks-user-guide">https://github.com/awsdocs/amazon-eks-user-guide</a></li><li>Installing or updating the latest version of the AWS CLI - <a href="https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html">https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html</a></li><li>Installing or updating eksctl - <a href="https://docs.aws.amazon.com/eks/latest/userguide/eksctl.html">https://docs.aws.amazon.com/eks/latest/userguide/eksctl.html</a></li><li>Introduction | eksctl - <a href="https://eksctl.io/introduction/">https://eksctl.io/introduction/</a></li><li>Install and Set Up kubectl on Linux - <a href="https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/">https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/</a></li><li>Configuration and credential file settings - <a href="https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html">https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html</a></li><li>Minimum IAM policies | eksctl - <a href="https://eksctl.io/usage/minimum-iam-policies/#minimum-iam-policies">https://eksctl.io/usage/minimum-iam-policies/#minimum-iam-policies</a></li><li>Amazon EKS control plane logging - <a href="https://docs.aws.amazon.com/eks/latest/userguide/control-plane-logs.html">https://docs.aws.amazon.com/eks/latest/userguide/control-plane-logs.html</a></li></ol>

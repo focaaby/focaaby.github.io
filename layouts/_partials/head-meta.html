@@ -1,0 +1,84 @@
+{{- /* Approximation of Ghost {{ghost_head}} SEO output */ -}}
+{{- $site := site -}}
+{{- $isPost := and .IsPage (eq .Section "posts") -}}
+{{- $desc := "" -}}{{- $title := "" -}}{{- $ogType := "website" -}}{{- $img := $site.Params.cover_image -}}
+{{- if $isPost -}}
+  {{- $title = .Params.meta_title | default .Title -}}
+  {{- $desc = .Params.description -}}
+  {{- $ogType = "article" -}}
+  {{- $img = .Params.feature_image | default "" -}}
+{{- else if eq .Kind "term" -}}
+  {{- $title = printf "%s - %s" .Title $site.Title -}}
+  {{- $desc = .Params.description | default "" -}}
+  {{- if eq .Data.Plural "authors" -}}{{- $ogType = "profile" -}}{{- $img = "" -}}{{- end -}}
+{{- else -}}
+  {{- $title = $site.Title -}}
+  {{- $desc = $site.Params.description -}}
+{{- end -}}
+{{- $absImg := "" -}}{{- with $img -}}{{- if hasPrefix . "/" -}}{{- $absImg = absURL (strings.TrimPrefix "/" .) -}}{{- else -}}{{- $absImg = . -}}{{- end -}}{{- end -}}
+{{- $canonical := .Permalink -}}
+{{- $paged := in (slice "home" "term") .Kind -}}
+{{- if $paged -}}{{- with .Paginator -}}{{- if gt .PageNumber 1 -}}{{- $canonical = .URL | absURL -}}{{- end -}}{{- end -}}{{- end -}}
+{{- with .Params.canonical_url -}}{{- $canonical = . -}}{{- end -}}
+    {{- $isPaged := and (in (slice "home" "term") .Kind) (gt .Paginator.PageNumber 1) }}
+    {{ if not $isPaged }}{{ with $desc }}<meta name="description" content="{{ . }}">{{ end }}{{ end }}
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="canonical" href="{{ $canonical }}">
+    <meta name="referrer" content="no-referrer-when-downgrade">
+    {{- if $paged }}
+    {{ with .Paginator.Prev }}<link rel="prev" href="{{ .URL | absURL }}">{{ end }}
+    {{ with .Paginator.Next }}<link rel="next" href="{{ .URL | absURL }}">{{ end }}
+    {{- end }}
+    {{- $pageNo := 1 -}}{{- if (in (slice "home" "term") .Kind) -}}{{- $pageNo = .Paginator.PageNumber -}}{{- end -}}
+    {{- if eq $pageNo 1 }}
+    <meta property="og:site_name" content="{{ $site.Title }}">
+    <meta property="og:type" content="{{ $ogType }}">
+    <meta property="og:title" content="{{ .Params.og_title | default $title }}">
+    {{ with (.Params.og_description | default $desc) }}<meta property="og:description" content="{{ . }}">{{ end }}
+    <meta property="og:url" content="{{ $canonical }}">
+    {{ with (.Params.og_image | default $absImg) }}<meta property="og:image" content="{{ . }}">{{ end }}
+    {{- if $isPost }}
+    <meta property="article:published_time" content="{{ .Date.UTC.Format "2006-01-02T15:04:05.000Z" }}">
+    <meta property="article:modified_time" content="{{ .Lastmod.UTC.Format "2006-01-02T15:04:05.000Z" }}">
+    {{ range .GetTerms "tags" }}<meta property="article:tag" content="{{ .Title }}">
+    {{ end }}
+    {{- end }}
+    <meta property="article:publisher" content="https://www.facebook.com/{{ $site.Params.facebook }}">
+    <meta name="twitter:card" content="{{ if $absImg }}summary_large_image{{ else }}summary{{ end }}">
+    <meta name="twitter:title" content="{{ .Params.twitter_title | default $title }}">
+    {{ with (.Params.twitter_description | default $desc) }}<meta name="twitter:description" content="{{ . }}">{{ end }}
+    <meta name="twitter:url" content="{{ $canonical }}">
+    {{ with (.Params.twitter_image | default $absImg) }}<meta name="twitter:image" content="{{ . }}">{{ end }}
+    <meta name="twitter:site" content="{{ $site.Params.twitter }}">
+    {{- if $isPost }}
+    <meta name="twitter:label1" content="Written by">
+    <meta name="twitter:data1" content="{{ range $i, $a := .GetTerms "authors" }}{{ if $i }}, {{ end }}{{ $a.Title }}{{ end }}">
+    <meta name="twitter:label2" content="Filed under">
+    <meta name="twitter:data2" content="{{ delimit (apply (.GetTerms "tags") "partial" "term-title.html" ".") ", " }}">
+    {{- end }}
+    {{- $ld := dict "@context" "https://schema.org" -}}
+    {{- $publisher := dict "@type" "Organization" "name" $site.Title "url" $site.Home.Permalink "logo" (dict "@type" "ImageObject" "url" (absURL "favicon.ico") "width" 48 "height" 48) -}}
+    {{- if $isPost -}}
+      {{- $author := index (.GetTerms "authors") 0 -}}
+      {{- $ld = merge $ld (dict "@type" "Article" "publisher" $publisher "author" (dict "@type" "Person" "name" $author.Title "url" $author.Permalink "image" (dict "@type" "ImageObject" "url" (absURL (strings.TrimPrefix "/" $author.Params.profile_image)))) "headline" .Title "url" .Permalink "datePublished" (.Date.UTC.Format "2006-01-02T15:04:05.000Z") "dateModified" (.Lastmod.UTC.Format "2006-01-02T15:04:05.000Z") "keywords" (delimit (apply (.GetTerms "tags") "partial" "term-title.html" ".") ", ") "description" $desc "mainEntityOfPage" .Permalink) -}}
+      {{- with $absImg -}}{{- $ld = merge $ld (dict "image" (dict "@type" "ImageObject" "url" .)) -}}{{- end -}}
+    {{- else if eq .Kind "term" -}}
+      {{- if eq .Data.Plural "authors" -}}
+        {{- $ld = merge $ld (dict "@type" "Person" "name" .Title "url" .Permalink "mainEntityOfPage" .Permalink) -}}
+      {{- else -}}
+        {{- $ld = merge $ld (dict "@type" "Series" "publisher" $publisher "url" .Permalink "name" .Title "mainEntityOfPage" .Permalink) -}}
+      {{- end -}}
+    {{- else -}}
+      {{- $ld = merge $ld (dict "@type" "WebSite" "publisher" $publisher "url" $site.Home.Permalink "name" $site.Title "description" $desc "mainEntityOfPage" $site.Home.Permalink) -}}
+      {{- with $absImg -}}{{- $ld = merge $ld (dict "image" (dict "@type" "ImageObject" "url" .)) -}}{{- end -}}
+    {{- end }}
+    <script type="application/ld+json">{{ $ld | jsonify (dict "indent" "    ") | safeJS }}</script>
+    {{- end }}
+    <meta name="generator" content="Hugo {{ hugo.Version }}">
+    <link rel="alternate" type="application/rss+xml" title="{{ $site.Title }}" href="{{ absURL "rss/" }}">
+    <script defer src="/public/cards.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="/public/cards.min.css">
+    {{- with $site.Params.adsense_client }}
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={{ . }}" crossorigin="anonymous"></script>
+    {{- end }}
+    <style>:root {--ghost-accent-color: {{ $site.Params.accent_color | safeCSS }};}</style>

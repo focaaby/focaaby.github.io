@@ -1,0 +1,20 @@
+---
+title: "Managing your dotfiles with git"
+slug: "managing-your-dotfiles-with-git"
+date: "2017-06-27T08:00:00+08:00"
+lastmod: "2021-10-11T06:24:21+08:00"
+draft: false
+tags: ["dotfiles", "bash", "zsh"]
+authors: ["focaaby"]
+featured: false
+excerpt: "前言\n由於學校計畫或是作業情況不同，經常使用非常多的語言環境，經常會讓自己 OS 處於小宇宙爆炸的情況。先前（其實是很久以前了 QQ）整理的 vimrc\n[https://github.com/focaaby/vimrc] 可以在重灌系統的時候快速建立 vim plugin\n及習慣設定。現在是該好好整理可以同時兼容 macOS 或 Linux 環境。\n\n何謂 Dotfiles\n在家目錄 ls -al 查看所有檔案，可以發現許多 . 以點開頭的檔案，在 Unix-like\n系統中，這些以點開頭的檔案都為隱藏檔，主要功能\b為環境中的相關設定。\n\n{{< img-post path=\"date\" file=\"home.png\""
+description: "前言\n由於學校計畫或是作業情況不同，經常使用非常多的語言環境，經常會讓自己 OS 處於小宇宙爆炸的情況。先前（其實是很久以前了 QQ）整理的 vimrc\n[https://github.com/focaaby/vimrc] 可以在重灌系統的時候快速建立 vim plugin\n及習慣設定。現在是該好好整理可以同時兼容 macOS 或 Linux 環境。\n\n何謂 Dotfiles\n在家目錄 ls -al 查看所有檔案，可以發現許多 . 以點開頭的檔案，在 Unix-like\n系統中，這些以點開頭的檔案都為隱藏檔，主要功能\b為環境中的相關設定。\n\n{{< img-post path=\"date\" file=\"home.png\""
+reading_time: "1 min read"
+---
+<h2 id="%E5%89%8D%E8%A8%80">前言</h2><p>由於學校計畫或是作業情況不同，經常使用非常多的語言環境，經常會讓自己 OS 處於小宇宙爆炸的情況。先前（其實是很久以前了 QQ）整理的 <a href="https://github.com/focaaby/vimrc">vimrc</a> 可以在重灌系統的時候快速建立 vim plugin 及習慣設定。現在是該好好整理可以同時兼容 <code>macOS</code> 或 <code>Linux</code> 環境。</p><h2 id="%E4%BD%95%E8%AC%82-dotfiles">何謂 Dotfiles</h2><p>在家目錄 <code>ls -al</code> 查看所有檔案，可以發現許多 <code>.</code> 以點開頭的檔案，在 Unix-like 系統中，這些以點開頭的檔案都為隱藏檔，主要功能為環境中的相關設定。</p><p>{{&lt; img-post path="date" file="home.png" alt="home-ls-al￼" &gt;}}</p><p><code>.bash_profile</code> or <code>.profile</code> 在 Bash shell 環境中，是家目錄裡第一個被讀取的檔案，在這檔案通常裡都會去檢查你的當前 shell 並去執行（或是 <code>source</code>）：</p><p>dbash</p><h1 id="if-running-bash">if running bash</h1><pre><code>  if [ -n "$BASH_VERSION" ]; then
+      # include .bashrc if it exists
+      if [ -f "$HOME/.bashrc" ]; then
+          . "$HOME/.bashrc"
+      fi
+  fi
+</code></pre><p>d</p><ul><li><code>.bashrc</code> or <code>.zshrc</code> 根據你所使用的 shell 環境則會有不同的相關設定， macOS 及 Linux 環境中基本上都是使用 Bash shell，預設 <code>.bashrc</code> 會設定基本的顏色、alias 等，而我自己則是習慣使用 Z Shell 搭配 <a href="https://github.com/robbyrussell/oh-my-zsh">Oh My Zsh</a>。</li></ul><h2 id="%E6%AD%B8%E9%A1%9E">歸類</h2><p>根據功能可分成：</p><ul><li>shell：設定 zsh plugin 為主。</li><li>alias：可以將稍微較長的慣用指令，設定成較短的指令。如：<code>alias l="ls -la"</code>。</li><li>tool：如 screen、tmux 設定。</li><li>init：撰寫初始化 OS 的 shell script。</li></ul><h1 id="reference">Reference</h1><ol><li><a href="https://dotfiles.github.io/">dotfiles.github.io</a></li><li><a href="https://github.com/webpro/awesome-dotfiles">awesome-dotfiles</a></li><li><a href="https://github.com/mathiasbynens/dotfiles">mathiasbynens/dotfiles</a></li><li><a href="https://medium.com/@webprolific/getting-started-with-dotfiles-43c3602fd789">Getting Started With Dotfiles</a></li></ol>

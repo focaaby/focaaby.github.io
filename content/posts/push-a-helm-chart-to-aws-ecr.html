@@ -1,0 +1,227 @@
+---
+title: "Push a Helm Chart to AWS ECR"
+slug: "push-a-helm-chart-to-aws-ecr"
+date: "2021-05-04T08:00:00+08:00"
+lastmod: "2021-10-11T07:34:52+08:00"
+draft: false
+tags: ["ecr", "oci", "helm", "aws"]
+authors: ["focaaby"]
+featured: false
+custom_excerpt: "This article will go through how to push a Helm chart to ECR. Also, I try to use the Helm Dependency on ECR. The ECR supported the Helm template written in Helm Dependency, but ECR repositories are still not can not add as Helm repo currently."
+excerpt: "This article will go through how to push a Helm chart to ECR. Also, I try to use the Helm Dependency on ECR. The ECR supported the Helm template written in Helm Dependency, but ECR repositories are still not can not add as Helm repo currently."
+description: "This article will go through how to push a Helm chart to ECR. Also, I try to use the Helm Dependency on ECR. The ECR supported the Helm template written in Helm Dependency, but ECR repositories are still not can not add as Helm repo currently."
+reading_time: "4 min read"
+---
+<h2 id="summary">Summary</h2><p>AWS ECR supports pushing Open Container Initiative (OCI) artifacts[1][2] to your repositories, and this article will go through how to push a Helm chart to ECR. Also, I try to use the Helm Dependency on ECR. The ECR supported the Helm template written in Helm Dependency, but ECR repositories are still not can not add as Helm repo currently.</p><h2 id="testing-steps">Testing Steps</h2><!--kg-card-begin: markdown--><ol>
+<li>
+<p>Following the steps in document[2] to install the Helm client version 3.</p>
+<pre><code class="language-bash">$ helm version
+
+version.BuildInfo{Version:&quot;v3.5.3&quot;, GitCommit:&quot;041ce5a2c17a58be0fcd5f5e16fb3e7e95fea622&quot;, GitTreeState:&quot;dirty&quot;, GoVersion:&quot;go1.15.8&quot;}
+</code></pre>
+</li>
+<li>
+<p>Enable OCI support in the Helm 3 client.</p>
+<pre><code class="language-bash">$ export HELM_EXPERIMENTAL_OCI=1
+</code></pre>
+</li>
+<li>
+<p>Create a repository to store your Helm chart</p>
+<pre><code class="language-bash">$ aws ecr create-repository \
+        --repository-name helm-test \
+        --region eu-west-1
+{
+    &quot;repository&quot;: {
+        &quot;repositoryArn&quot;: &quot;arn:aws:ecr:eu-west-1:123456789012:repository/helm-test&quot;,
+        &quot;registryId&quot;: &quot;123456789012&quot;,
+        &quot;repositoryName&quot;: &quot;helm-test&quot;,
+        &quot;repositoryUri&quot;: &quot;123456789012.dkr.ecr.eu-west-1.amazonaws.com/helm-test&quot;,
+        &quot;createdAt&quot;: &quot;2021-05-04T15:07:49+00:00&quot;,
+        &quot;imageTagMutability&quot;: &quot;MUTABLE&quot;,
+        &quot;imageScanningConfiguration&quot;: {
+            &quot;scanOnPush&quot;: false
+        },
+        &quot;encryptionConfiguration&quot;: {
+            &quot;encryptionType&quot;: &quot;AES256&quot;
+        }
+    }
+}
+</code></pre>
+</li>
+<li>
+<p>Authenticate your Helm client to the Amazon ECR registry to which you intend to push your Helm chart.</p>
+<pre><code class="language-bash">$ aws ecr get-login-password \
+    --region eu-west-1 | helm registry login \
+    --username AWS \
+    --password-stdin 123456789012.dkr.ecr.eu-west-1.amazonaws.com
+Login succeeded
+</code></pre>
+</li>
+<li>
+<p>Use the following steps to create a test Helm chart.</p>
+<pre><code class="language-bash">$ mkdir helm-tutorial
+$ cd helm-tutorial
+
+$ helm create mychart
+Creating mychart
+
+$ rm -rf ./mychart/templates/*
+
+$ cd mychart/templates
+$ cat &lt;&lt;EOF &gt; configmap.yaml
+&gt; apiVersion: v1
+&gt; kind: ConfigMap
+&gt; metadata:
+&gt;   name: mychart-configmap
+&gt; data:
+&gt;   myvalue: &quot;Hello World&quot;
+&gt; EOF
+</code></pre>
+</li>
+<li>
+<p>Save the chart locally and create an alias for the chart with your registry URI.</p>
+<pre><code class="language-bash">$ cd ..
+$ helm chart save . mychart
+ref:     mychart:0.1.0
+digest:  66ac23dc1e383370778e2a8db2bf1d93e73f169af14569618dcec38a086405a4
+size:    1.4 KiB
+name:    mychart
+version: 0.1.0
+0.1.0: saved
+
+$ helm chart save . 123456789012.dkr.ecr.eu-west-1.amazonaws.com/helm-test:mychart
+ref:     123456789012.dkr.ecr.eu-west-1.amazonaws.com/helm-test:mychart
+digest:  2935917ffbc7492eae674f1e82308a2acd4e41b3b6db4c25b79a25095481ebca
+size:    1.4 KiB
+name:    mychart
+version: 0.1.0
+mychart: saved
+</code></pre>
+</li>
+<li>
+<p>Identify the Helm chart to push. Run the helm chart list command to list the Helm charts on your system.</p>
+<pre><code class="language-bash">$ helm chart list
+REF                                                             NAME    VERSION DIGEST  SIZE    CREATED
+123456789012.dkr.ecr.eu-west-1.amazonaws.com/helm-test:my...    mychart 0.1.0   66ac23d 1.4 KiB 2 minutes
+mychart:0.1.0
+</code></pre>
+</li>
+<li>
+<p>Push the Helm chart using the helm chart push command.</p>
+<pre><code class="language-bash">$ helm chart push 123456789012.dkr.ecr.eu-west-1.amazonaws.com/helm-test:mychart
+The push refers to repository [123456789012.dkr.ecr.eu-west-1.amazonaws.com/helm-test]
+ref:     123456789012.dkr.ecr.eu-west-1.amazonaws.com/helm-test:mychart
+digest:  2935917ffbc7492eae674f1e82308a2acd4e41b3b6db4c25b79a25095481ebca
+size:    1.4 KiB
+name:    mychart
+version: 0.1.0
+mychart: pushed to remote (1 layer, 1.4 KiB total)
+</code></pre>
+</li>
+<li>
+<p>Describe your Helm chart.</p>
+<pre><code class="language-bash">$ aws ecr describe-images \
+    --repository-name helm-test \
+    --region eu-west-1
+{
+    &quot;imageDetails&quot;: [
+        {
+            &quot;registryId&quot;: &quot;123456789012&quot;,
+            &quot;repositoryName&quot;: &quot;helm-test&quot;,
+            &quot;imageDigest&quot;: &quot;sha256:2935917ffbc7492eae674f1e82308a2acd4e41b3b6db4c25b79a25095481ebca&quot;,
+            &quot;imageTags&quot;: [
+                &quot;mychart&quot;
+            ],
+            &quot;imageSizeInBytes&quot;: 1610,
+            &quot;imagePushedAt&quot;: &quot;2021-05-04T15:16:24+00:00&quot;,
+            &quot;imageManifestMediaType&quot;: &quot;application/vnd.oci.image.manifest.v1+json&quot;,
+            &quot;artifactMediaType&quot;: &quot;application/vnd.cncf.helm.config.v1+json&quot;
+        }
+    ]
+}
+</code></pre>
+</li>
+<li>
+<p>Copy the mychart directory to mychart-dependency.</p>
+<pre><code class="language-bash">$ cp -r mychart/ mychart-dependency
+</code></pre>
+</li>
+<li>
+<p>Create another new ECR repository named helm-dependency.</p>
+<pre><code class="language-bash">$ aws ecr create-repository \
+        --repository-name helm-dependency \
+        --region eu-west-1
+
+{
+    &quot;repository&quot;: {
+        &quot;repositoryArn&quot;: &quot;arn:aws:ecr:eu-west-1:123456789012:repository/helm-dependency&quot;,
+        &quot;registryId&quot;: &quot;123456789012&quot;,
+        &quot;repositoryName&quot;: &quot;helm-dependency&quot;,
+        &quot;repositoryUri&quot;: &quot;123456789012.dkr.ecr.eu-west-1.amazonaws.com/helm-dependency&quot;,
+        &quot;createdAt&quot;: &quot;2021-05-04T15:21:25+00:00&quot;,
+        &quot;imageTagMutability&quot;: &quot;MUTABLE&quot;,
+        &quot;imageScanningConfiguration&quot;: {
+            &quot;scanOnPush&quot;: false
+        },
+        &quot;encryptionConfiguration&quot;: {
+            &quot;encryptionType&quot;: &quot;AES256&quot;
+        }
+    }
+}
+</code></pre>
+</li>
+<li>
+<p>Update the Chart.yaml and add the configuration for Helm dependencies.</p>
+<pre><code class="language-bash">$ cat Chart.yaml
+apiVersion: v2
+name: mychart-dependency
+description: A Helm chart for Kubernetes
+
+type: application
+version: 0.1.0
+appVersion: &quot;1.16.0&quot;
+
+dependencies:
+- name: mychart
+  version: &quot;0.1.0&quot;
+  repository: &quot;123456789012.dkr.ecr.eu-west-1.amazonaws.com/helm-test:mychart&quot;
+</code></pre>
+</li>
+<li>
+<p>Push Helm chart <code>mychart-dependency</code> using the helm chart push command.</p>
+<pre><code class="language-bash">$ helm chart save . mychart-dependency
+ref:     mychart-dependency:0.1.0
+digest:  5d948b5d95b7e455215fd957930c057a2e556b437656713a7deefae0c8017dfa
+size:    1.5 KiB
+name:    mychart-dependency
+version: 0.1.0
+0.1.0: saved
+
+$ helm chart save . 123456789012.dkr.ecr.eu-west-1.amazonaws.com/helm-dependency:mychart-dependency
+ref:     123456789012.dkr.ecr.eu-west-1.amazonaws.com/helm-dependency:mychart-dependency
+digest:  a1200cf17bfae3a733c83b8981da2b2e2b44a79963ffc1dab53cbc58e6f8e8c9
+size:    1.5 KiB
+name:    mychart-dependency
+version: 0.1.0
+mychart-dependency: saved
+
+$ helm chart list
+REF                                                             NAME                    VERSION DIGEST  SIZE    CREATED
+123456789012.dkr.ecr.eu-west-1.amazonaws.com/helm-depende...    mychart-dependency      0.1.0   a1200cf 1.5 KiB 20 seconds
+123456789012.dkr.ecr.eu-west-1.amazonaws.com/helm-test:my...    mychart                 0.1.0   a1200cf 1.4 KiB 14 minutes
+mychart-dependency:0.1.0                                        mychart-dependency      0.1.0   a1200cf 1.5 KiB 58 seconds
+mychart:0.1.0                                                   mychart                 0.1.0   a1200cf 1.4 KiB 15 minutes
+
+$ helm chart push 123456789012.dkr.ecr.eu-west-1.amazonaws.com/helm-dependency:mychart-dependency
+The push refers to repository [123456789012.dkr.ecr.eu-west-1.amazonaws.com/helm-dependency]
+ref:     123456789012.dkr.ecr.eu-west-1.amazonaws.com/helm-dependency:mychart-dependency
+digest:  a1200cf17bfae3a733c83b8981da2b2e2b44a79963ffc1dab53cbc58e6f8e8c9
+size:    1.5 KiB
+name:    mychart-dependency
+version: 0.1.0
+mychart-dependency: pushed to remote (1 layer, 1.5 KiB total)
+</code></pre>
+</li>
+</ol>
+<p>Helm dependency is using the &quot;repository&quot; URL should point to a Chart Repository[4], which is ECR not supported yet currently[5].</p>
+<!--kg-card-end: markdown--><h2 id="references">References</h2><ol><li>OCI Artifact Support In Amazon ECR - <a href="https://docs.aws.amazon.com/AmazonECR/latest/userguide/push-oci-artifact.html">https://docs.aws.amazon.com/AmazonECR/latest/userguide/push-oci-artifact.html</a></li><li>ECR supports pushing Open Container Initiative (OCI) artifacts to your repositories - <a href="https://docs.aws.amazon.com/AmazonECR/latest/userguide/push-oci-artifact.html">https://docs.aws.amazon.com/AmazonECR/latest/userguide/push-oci-artifact.html</a></li><li>Using Amazon ECR Images with Amazon EKS - Installing a Helm chart hosted on Amazon ECR with Amazon EKS - <a href="https://docs.aws.amazon.com/AmazonECR/latest/userguide/ECR_on_EKS.html#using-helm-charts-eks">https://docs.aws.amazon.com/AmazonECR/latest/userguide/ECR_on_EKS.html#using-helm-charts-eks</a></li><li>Helm Dependency - <a href="https://helm.sh/docs/helm/helm_dependency/">https://helm.sh/docs/helm/helm_dependency/</a></li><li>Allow Helm to automatically install from a chart stored in an ECR repository - <a href="https://github.com/aws/containers-roadmap/issues/1116">https://github.com/aws/containers-roadmap/issues/1116</a></li></ol>

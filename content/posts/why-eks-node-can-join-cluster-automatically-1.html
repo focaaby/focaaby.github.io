@@ -1,0 +1,139 @@
+---
+title: "為什麼 EKS worker node 可以自動加入 EKS cluster（一）"
+slug: "why-eks-node-can-join-cluster-automatically-1"
+date: "2022-09-18T23:40:43+08:00"
+lastmod: "2022-09-19T22:57:10+08:00"
+draft: false
+tags: ["ironman-2022", "eks", "kubernetes"]
+authors: ["focaaby"]
+featured: false
+excerpt: "如果是一個自建的 Kubernetes cluster，我們會需要使用 Certificate Authority 憑證給予 Kubernetes\nComponents\n[https://kubernetes.io/docs/concepts/overview/components/#node-components] [1]\n所使用，如 Kubernetes The Hard Way\n[https://github.com/kelseyhightower/kubernetes-the-hard-way/blob/master/docs/04-certificate-authority.md] \n[2] 或是以下 kubeadm join\n[https://kubernetes.io/docs/reference/setup-tools/kubeadm/kubeadm-join/] [3]\n命令則可以使 Kubernetes node"
+description: "如果是一個自建的 Kubernetes cluster，我們會需要使用 Certificate Authority 憑證給予 Kubernetes\nComponents\n[https://kubernetes.io/docs/concepts/overview/components/#node-components] [1]\n所使用，如 Kubernetes The Hard Way\n[https://github.com/kelseyhightower/kubernetes-the-hard-way/blob/master/docs/04-certificate-authority.md] \n[2] 或是以下 kubeadm join\n[https://kubernetes.io/docs/reference/setup-tools/kubeadm/kubeadm-join/] [3]\n命令則可以使 Kubernetes node"
+feature_image: "https://images.unsplash.com/photo-1618826411640-d6df44dd3f7a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwxMTc3M3wwfDF8c2VhcmNofDZ8fGNhdHxlbnwwfHx8fDE2NjM1MTU2MzA&ixlib=rb-1.2.1&q=80&w=2000"
+feature_image_caption: "Photo by <a href=\"https://unsplash.com/es/@bogdanf?utm_source=ghost&utm_medium=referral&utm_campaign=api-credit\">Bogdan Farca</a> / <a href=\"https://unsplash.com/?utm_source=ghost&utm_medium=referral&utm_campaign=api-credit\">Unsplash</a>"
+reading_time: "6 min read"
+---
+<p>如果是一個自建的 Kubernetes cluster，我們會需要使用 Certificate Authority 憑證給予 <a href="https://kubernetes.io/docs/concepts/overview/components/#node-components">Kubernetes Components</a> [1] 所使用，如 <a href="https://github.com/kelseyhightower/kubernetes-the-hard-way/blob/master/docs/04-certificate-authority.md">Kubernetes The Hard Way</a> [2] 或是以下 <a href="https://kubernetes.io/docs/reference/setup-tools/kubeadm/kubeadm-join/"><code>kubeadm join</code></a> [3] 命令則可以使 Kubernetes node 加入 cluster：</p><pre><code>$ kubeadm join --discovery-token abcdef.1234567890abcdef --discovery-token-ca-cert-hash sha256:1234..cdef 1.2.3.4:6443
+</code></pre><p>在 EKS 環境中，nodegroup 一詞代表了 Kubernetes nodes 集合，而我們也可以使用 <a href="https://eksctl.io/usage/managing-nodegroups/"><code>eksctl scale</code></a> [4] 命令 scale up Nodes。</p><pre><code>$ eksctl scale ng --nodes=3 --nodes-max=10 --name=ng1-public-ssh --cluster=ironman-2022
+2022-09-18 14:14:18 [ℹ]  scaling nodegroup "ng1-public-ssh" in cluster ironman-2022
+2022-09-18 14:14:18 [ℹ]  waiting for scaling of nodegroup "ng1-public-ssh" to complete
+2022-09-18 14:14:48 [ℹ]  nodegroup successfully scaled
+</code></pre><p>而在短短幾分鐘內，我們並無需要手動設定 TLS 憑證，EKS node 則可以順利自動加入集群。</p><pre><code>$ kubectl get node
+NAME                                           STATUS   ROLES    AGE     VERSION
+...
+ip-192-168-40-16.eu-west-1.compute.internal    Ready    &lt;none&gt;   34s     v1.22.12-eks-ba74326
+...
+</code></pre><p>故將探討「為什麼 EKS 節點可以自動加入集群」，希望理解 EKS node 預設了哪些設置允許 node 可以自動加入 cluster。本文將著重於：</p><ul><li>何謂 EKS node group？</li><li>EKS AMI bootstrap script 預設了哪些設定？</li></ul><h2 id="eks-node-group">EKS node group</h2><p>一個完整的 <a href="https://kubernetes.io/docs/concepts/overview/components/">Kubernetes Components</a> [1] 可以分成為 Control Plane 端及 Node 端。其中 在 EKS cluster 環境中，AWS 服務整合了 EC2、Auto Scaling groups 等服務的 worker node 資源稱之為 nodegroup（節點組）。根據 EKS Node 文件，又可以分成 <a href="https://docs.aws.amazon.com/eks/latest/userguide/managed-node-groups.html">Managed node groups（託管節點組）</a> [6] <a href="https://docs.aws.amazon.com/eks/latest/userguide/worker.html">及 Self-managed nodes（自行管理節點組）</a> [7]。</p><p>於 <a href="https://ithelp.ithome.com.tw/articles/10291924">第一天</a> 的 <code>eksctl</code> ClusterConfig 文件定義使用了 Managed node groups <code>ng1-public-ssh</code>。</p><pre><code>apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+metadata:
+  name: ironman-2022
+  region: eu-west-1
+
+managedNodeGroups:
+  - name: "ng1-public-ssh"
+    desiredCapacity: 2
+    ssh:
+      # Enable ssh access (via the admin container)
+      allow: true
+      publicKeyName: "ironman-2022"
+    iam:
+      withAddonPolicies:
+        ebs: true
+        fsx: true
+        efs: true
+        awsLoadBalancerController: true
+        autoScaler: true
+
+iam:
+  withOIDC: true
+
+cloudWatch:
+  clusterLogging:
+    enableTypes: ["*"]
+</code></pre><p>在建立完環境後，我們會有名為 <code>ng1-public-ssh</code> 的 Managed node groups：</p><pre><code>$ eksctl get ng --cluster=ironman-2022
+CLUSTER NODEGROUP       STATUS  CREATED                 MIN SIZE        MAX SIZE        DESIRED CAPACITY        INSTANCE TYPE   IMAGE ID        ASG NAME                    TYPE
+ironman-2022 ng1-public-ssh  ACTIVE  2022-09-14T09:54:36Z    0               10              3                       m5.large        AL2_x86_64      eks-ng1-public-ssh-62c19db5-f965-bdb7-373a-147e04d9f124      managed
+</code></pre><p>因此我們也可以透過 <a href="https://docs.aws.amazon.com/cli/latest/reference/eks/describe-nodegroup.html"><code>aws eks describe-nodegroup</code></a> [8] 命令查看 nodegroup 資源資訊：</p><pre><code>$ aws eks describe-nodegroup --cluster-name ironman-2022 --nodegroup-name ng1-public-ssh
+{
+    "nodegroup": {
+        "nodegroupName": "ng1-public-ssh",
+        "nodegroupArn": "arn:aws:eks:eu-west-1:111111111111:nodegroup/ironman-2022/ng1-public-ssh/62c19db5-f965-bdb7-373a-147e04d9f124",
+        "clusterName": "ironman-2022",
+        "version": "1.22",
+        "releaseVersion": "1.22.12-20220824",
+        "createdAt": "2022-09-14T09:54:36.211000+00:00",
+        "modifiedAt": "2022-09-18T13:45:07.322000+00:00",
+        "status": "ACTIVE",
+        "capacityType": "ON_DEMAND",
+        "scalingConfig": {
+            "minSize": 0,
+            "maxSize": 2,
+            "desiredSize": 2
+        },
+        "instanceTypes": [
+            "m5.large"
+        ],
+        "subnets": [
+            "subnet-0e863f9fbcda592a3",
+            "subnet-00ebeb2e8903fb3f9",
+            "subnet-02d98be342d8ab2a7"
+        ],
+        "amiType": "AL2_x86_64",
+        "nodeRole": "arn:aws:iam::111111111111:role/eksctl-ironman-2022-nodegroup-ng1-publ-NodeInstanceRole-HN27OZ18JS6U",
+        "labels": {
+            "alpha.eksctl.io/cluster-name": "ironman-2022",
+            "alpha.eksctl.io/nodegroup-name": "ng1-public-ssh"
+        },
+        "resources": {
+            "autoScalingGroups": [
+                {
+                    "name": "eks-ng1-public-ssh-62c19db5-f965-bdb7-373a-147e04d9f124"
+                }
+            ]
+        },
+        "health": {
+            "issues": []
+        },
+        "updateConfig": {
+            "maxUnavailable": 1
+        },
+        "launchTemplate": {
+            "name": "eksctl-ironman-2022-nodegroup-ng1-public-ssh",
+            "version": "1",
+            "id": "lt-000b4417a7baebbf8"
+        },
+        "tags": {
+            "aws:cloudformation:stack-name": "eksctl-ironman-2022-nodegroup-ng1-public-ssh",
+            "alpha.eksctl.io/cluster-name": "ironman-2022",
+            "alpha.eksctl.io/nodegroup-name": "ng1-public-ssh",
+            "aws:cloudformation:stack-id": "arn:aws:cloudformation:eu-west-1:111111111111:stack/eksctl-ironman-2022-nodegroup-ng1-public-ssh/2b5ad730-3413-11ed-9adb-0296792ac05b",
+            "auto-delete": "never",
+            "eksctl.cluster.k8s.io/v1alpha1/cluster-name": "ironman-2022",
+            "aws:cloudformation:logical-id": "ManagedNodeGroup",
+            "alpha.eksctl.io/nodegroup-type": "managed",
+            "alpha.eksctl.io/eksctl-version": "0.111.0"
+        }
+    }
+}
+</code></pre><p>由上述輸出內容 nodegroup 資源包含了此 Node 使用的 IAM role、Auto Scaling Group 名稱、Launch Template 及 CloudFormation 資訊。其中我們可以得知 EKS 預設使用 AMI 為： <code>AL2_x86_64</code>，此為 AWS 基於 Amazon Linux 2 AMI 維護 <a href="https://docs.aws.amazon.com/eks/latest/userguide/eks-optimized-ami.html">Amazon EKS optimized Amazon Linux AMIs</a> [9] 。</p><h2 id="amazon-eks-ami-build-specification">Amazon EKS AMI Build Specification</h2><p>使用 <a href="https://docs.aws.amazon.com/cli/latest/reference/ec2/describe-instance-attribute.html"><code>aws ec2 describe-instance-attribute</code></a> 命令查看 <a href="https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/user-data.html">EC2 userdata</a> [11] 並透過 base64 命令解析：</p><pre><code>$ aws ec2 describe-instance-attribute --instance-id i-1234567890abcdef0 --attribute userData | jq -r .UserData.Value | base64 -d
+MIME-Version: 1.0
+Content-Type: multipart/mixed; boundary="//"
+
+--//
+Content-Type: text/x-shellscript; charset="us-ascii"
+#!/bin/bash
+set -ex
+B64_CLUSTER_CA=LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUMvakNDQWVhZ0F3SUJBZ0lCQURBTkJna3Foa2lHOXcwQkFRc0ZBREFWTVJNd0VRWURWUVFERXdwcmRXSmwKY201bGRHV... SKIP    ...
+... CA      ...
+... CONTENT ...
+kZtcnI5V1lZRExMUDdLCm0xVUJQUWdzTzRQQlREUjlaLzhpbnZDV0FiT0szM2Z6OVZqU3dBbjlhQ0lXbU5FY2dVMkFUWm1FN0N4WEUrbFkKOFhjPQotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0tCg==
+API_SERVER_URL=https://1234567890ABCDEFGHIJKLMNOPQRSTUV.gr7.eu-west-1.eks.amazonaws.com
+K8S_CLUSTER_DNS_IP=10.100.0.10
+/etc/eks/bootstrap.sh ironman-2022 --kubelet-extra-args '--node-labels=eks.amazonaws.com/sourceLaunchTemplateVersion=1,alpha.eksctl.io/nodegroup-name=ng1-public-ssh,alpha.eksctl.io/cluster-name=ironman-2022,eks.amazonaws.com/nodegroup-image=ami-0ec9e1727a24fb788,eks.amazonaws.com/capacityType=ON_DEMAND,eks.amazonaws.com/nodegroup=ng1-public-ssh,eks.amazonaws.com/sourceLaunchTemplateId=lt-000b4417a7baebbf8 --max-pods=29' --b64-cluster-ca $B64_CLUSTER_CA --apiserver-endpoint $API_SERVER_URL --dns-cluster-ip $K8S_CLUSTER_DNS_IP --use-max-pods false
+
+--//--
+</code></pre><p>我們可以得知 bash script 定義：</p><ul><li><code>B64_CLUSTER_CA</code>、<code>API_SERVER_URL</code>、<code>K8S_CLUSTER_DNS_IP</code> 環境變數。</li><li>執行了於 <code>/etc/eks/bootstrap.sh</code> 路徑 script。</li></ul><p>根據 <a href="https://docs.aws.amazon.com/eks/latest/userguide/eks-ami-build-scripts.html">Amazon EKS optimized Amazon Linux AMI build script</a> [12] 提及了 <a href="https://github.com/awslabs/amazon-eks-ami">GitHub Amazon EKS AMI Build Specification</a> [13] 定義了 EKS node bootstrap script 包含 certificate data、control plane endpoint、cluster 名稱等資訊。</p><p>而預設的 userdata script 則定義了以下幾個參數：</p><ul><li>cluster 名稱。</li><li><code>--kubelet-extra-args</code>：定義額外 kubelet 參數，方便增加設定 labels 或 taints。</li><li><code>--b64-cluster-ca</code>：EKS cluster based64 編碼後的內容。此部分透過 AWS CLI  <code>aws eks describe-cluster</code> 命令取得後設定儲存於 <code>/etc/kubernetes/pki/ca.crt</code>。</li><li><code>--apiserver-endpoint</code>： EKS cluster API Server endpoint。與 <code>--b64-cluster-ca</code> 一樣皆是透過 <code>aws eks describe-cluster</code> 命令，並設定 kubelet 所使用的 kubeconfig 文件（<code>/var/lib/kubelet/kubeconfig</code> ）。</li><li><code>--dns-cluster-ip</code>：設定 EKS cluster 內部使用的 DNS IP 地址於 kubelet 設定文件  <code>/etc/kubernetes/kubelet/kubelet-config.json</code>，正是預設 CoreDNS（<code>kube-dns</code>）Service Cluster IP。預設使用 <code>10.100.0.10</code>，若使用 CIDR 10. 為 prefix 則會使用 <code>172.20.0.10</code><a href="https://github.com/awslabs/amazon-eks-ami/blob/master/files/bootstrap.sh#L462-L485">[14]</a>。</li></ul><pre><code>$ kubectl -n kube-system get svc
+NAME       TYPE        CLUSTER-IP    EXTERNAL-IP   PORT(S)         AGE
+kube-dns   ClusterIP   10.100.0.10   &lt;none&gt;        53/UDP,53/TCP   4d5h
+</code></pre><ul><li><code>--use-max-pods</code>：設置  kubelet 參數 <code>--max-pods</code> 於 kubelet 設定文件 <code>/etc/kubernetes/kubelet/kubelet-config.json</code>。</li></ul><h2 id="%E7%B8%BD%E7%B5%90">總結</h2><p>以上是 EKS worker node 啟用前在預設 EKS optimized Amazon Linux AMI 內預設 script 及針對 kubelet 參數設定，在經過初步了解之後，下一篇我們將會探討 kubelet TLS bootstrapping 啟動過程，來了解實際自動加入 cluster 過程 kubelet 及 control plane 所需設置。</p><hr><p>上述資訊透過 EKS 所提供 Logs 來驗證上游 Kubernetes 運作原理，倘若上述內文有所錯誤，隨時可以留言或是私訊我。</p><h2 id="%E5%8F%83%E8%80%83%E6%96%87%E4%BB%B6">參考文件</h2><ol><li>Kubernetes Components - <a href="https://kubernetes.io/docs/concepts/overview/components/#node-components">https://kubernetes.io/docs/concepts/overview/components/#node-components</a></li><li>Provisioning a CA and Generating TLS Certificates | Kubernetes The Hard Way - <a href="https://github.com/kelseyhightower/kubernetes-the-hard-way/blob/master/docs/04-certificate-authority.md">https://github.com/kelseyhightower/kubernetes-the-hard-way/blob/master/docs/04-certificate-authority.md</a></li><li>kubeadm join - <a href="https://kubernetes.io/docs/reference/setup-tools/kubeadm/kubeadm-join/">https://kubernetes.io/docs/reference/setup-tools/kubeadm/kubeadm-join/</a></li><li>Managing nodegroups | eksctl - <a href="https://eksctl.io/usage/managing-nodegroups/">https://eksctl.io/usage/managing-nodegroups/</a></li><li>Amazon EKS nodes - <a href="https://docs.aws.amazon.com/eks/latest/userguide/eks-compute.html">https://docs.aws.amazon.com/eks/latest/userguide/eks-compute.html</a></li><li>Managed node groups - <a href="https://docs.aws.amazon.com/eks/latest/userguide/managed-node-groups.html">https://docs.aws.amazon.com/eks/latest/userguide/managed-node-groups.html</a></li><li>Self-managed nodes - <a href="https://docs.aws.amazon.com/eks/latest/userguide/worker.html">https://docs.aws.amazon.com/eks/latest/userguide/worker.html</a></li><li>aws eks describe-nodegroup - <a href="https://docs.aws.amazon.com/cli/latest/reference/eks/describe-nodegroup.html">https://docs.aws.amazon.com/cli/latest/reference/eks/describe-nodegroup.html</a></li><li>Amazon EKS optimized Amazon Linux AMIs - <a href="https://docs.aws.amazon.com/eks/latest/userguide/eks-optimized-ami.html">https://docs.aws.amazon.com/eks/latest/userguide/eks-optimized-ami.html</a></li><li>aws ec2 describe-instance-attribute - <a href="https://docs.aws.amazon.com/cli/latest/reference/ec2/describe-instance-attribute.html">https://docs.aws.amazon.com/cli/latest/reference/ec2/describe-instance-attribute.html</a></li><li>Run commands on your Linux instance at launch - <a href="https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/user-data.html">https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/user-data.html</a></li><li>Amazon EKS optimized Amazon Linux AMI build script - <a href="https://docs.aws.amazon.com/eks/latest/userguide/eks-ami-build-scripts.html">https://docs.aws.amazon.com/eks/latest/userguide/eks-ami-build-scripts.html</a></li><li>Amazon EKS AMI Build Specification - <a href="https://github.com/awslabs/amazon-eks-ami">https://github.com/awslabs/amazon-eks-ami</a></li><li><a href="https://github.com/awslabs/amazon-eks-ami/blob/master/files/bootstrap.sh#L462-L485">https://github.com/awslabs/amazon-eks-ami/blob/master/files/bootstrap.sh#L462-L485</a></li><li>TLS bootstrapping - <a href="https://kubernetes.io/docs/reference/access-authn-authz/kubelet-tls-bootstrapping/">https://kubernetes.io/docs/reference/access-authn-authz/kubelet-tls-bootstrapping/</a></li></ol>

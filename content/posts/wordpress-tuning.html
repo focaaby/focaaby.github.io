@@ -1,0 +1,89 @@
+---
+title: "WordPress Tuning"
+slug: "wordpress-tuning"
+date: "2019-03-04T06:38:00+08:00"
+lastmod: "2021-10-11T05:29:26+08:00"
+draft: false
+tags: ["wordpress", "nginx"]
+authors: ["focaaby"]
+featured: false
+excerpt: "前言\n以前在兼差幫忙管理系所網站時，那時候學校主流 CMS\n[https://en.wikipedia.org/wiki/Content_management_system] 使用的是 Joomla，當年也從\napache2 移轉使用 NGINX 做了些微的調教，但是也沒有認真做個筆記。剛好公司的官網也要從 windows 移轉到 linux 伺服器上，不過使用的是\nWordPress，也稍微 survey 了相關調教，本篇為移轉過程及相關調教筆記。\n\n安裝與移轉\n使用伺服器架構為基本的 LNMP，可以參考 DigitalOcean - How To Install Linux, Nginx, MySQL, PHP\n(LEMP stack) in Ubuntu 16.04"
+description: "前言\n以前在兼差幫忙管理系所網站時，那時候學校主流 CMS\n[https://en.wikipedia.org/wiki/Content_management_system] 使用的是 Joomla，當年也從\napache2 移轉使用 NGINX 做了些微的調教，但是也沒有認真做個筆記。剛好公司的官網也要從 windows 移轉到 linux 伺服器上，不過使用的是\nWordPress，也稍微 survey 了相關調教，本篇為移轉過程及相關調教筆記。\n\n安裝與移轉\n使用伺服器架構為基本的 LNMP，可以參考 DigitalOcean - How To Install Linux, Nginx, MySQL, PHP\n(LEMP stack) in Ubuntu 16.04"
+feature_image: "https://images.unsplash.com/photo-1593642532842-98d0fd5ebc1a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwxMTc3M3wxfDF8YWxsfDF8fHx8fHwyfHwxNjMzNzMyNzUw&ixlib=rb-1.2.1&q=80&w=2000"
+reading_time: "4 min read"
+---
+<h2 id="%E5%89%8D%E8%A8%80">前言</h2><p>以前在兼差幫忙管理系所網站時，那時候學校主流 <a href="https://en.wikipedia.org/wiki/Content_management_system">CMS</a> 使用的是 Joomla，當年也從 apache2 移轉使用 NGINX 做了些微的調教，但是也沒有認真做個筆記。剛好公司的官網也要從 windows 移轉到 linux 伺服器上，不過使用的是 WordPress，也稍微 survey 了相關調教，本篇為移轉過程及相關調教筆記。</p><h2 id="%E5%AE%89%E8%A3%9D%E8%88%87%E7%A7%BB%E8%BD%89">安裝與移轉</h2><p>使用伺服器架構為基本的 LNMP，可以參考 <a href="https://www.digitalocean.com/community/tutorials/how-to-install-linux-nginx-mysql-php-lemp-stack-in-ubuntu-16-04">DigitalOcean - How To Install Linux, Nginx, MySQL, PHP (LEMP stack) in Ubuntu 16.04</a>，額外安裝的 php 套件有 <code>php7.0-curl</code>、<code>php7.0-zip</code>。</p><pre><code class="language-bash">$ apt install php7.0-curl php7.0-zip</code></pre><p>比較麻煩的點在於 windows 換行符號為 <code>^M</code> ，因此必須把每個檔案的換行符號切換成 linux 的換行符號。</p><pre><code class="language-bash"># 替換換行符號
+find . -type f -exec dot2unix {} \;
+# 確保資料夾及檔案權限
+find . -type d -exec chmod 755 {} \;
+find . -type f -exec chmod 644 {} \;
+</code></pre><h2 id="nginx-%E8%A8%AD%E5%AE%9A">Nginx 設定</h2><h3 id="gzip-%E5%8F%8A-cache">gzip 及 cache</h3><pre><code class="language-nginx">
+# gzip
+gzip on;
+gzip_static on;
+gzip_disable "msie6";
+
+gzip_vary on;
+gzip_proxied any;
+gzip_comp_level 6;
+gzip_buffers 16 8k;
+gzip_http_version 1.1;
+# Don't compress files smaller than 256 bytes, as size reduction will be negligible.
+gzip_min_length 256;
+gzip_types
+    application/atom+xml
+    application/javascript
+    application/json
+    application/ld+json
+    application/manifest+json
+    application/rss+xml
+    application/vnd.geo+json
+    application/vnd.ms-fontobject
+    application/x-font-ttf
+    application/x-web-app-manifest+json
+    application/xhtml+xml
+    application/xml
+    font/opentype
+    image/bmp
+    image/svg+xml
+    image/x-icon
+    text/cache-manifest
+    text/css
+    text/plain
+    text/vcard
+    text/vnd.rim.location.xloc
+    text/vtt
+    text/x-component
+    text/x-cross-domain-policy;
+
+# cache
+open_file_cache max=100000 inactive=20s;
+open_file_cache_valid 30s;
+open_file_cache_min_uses 2;
+open_file_cache_errors on;
+</code></pre><h3 id="%E7%B6%B2%E7%AB%99%E8%A8%AD%E5%AE%9A">網站設定</h3><p>參考官網 <a href="https://codex.wordpress.org/Nginx">Wordpress for Nginx config</a></p><ul><li>General WordPress rules：一般 WordPress 及 php 相關設定。</li><li>Global restrictions file：不該開放權限給人存取相關設定。</li></ul><h2 id="tuning">Tuning</h2><h3 id="nginx-%E7%B6%B2%E7%AB%99%E8%A8%AD%E5%AE%9A">NGINX 網站設定</h3><ul><li>盡可能的 cache 一些靜態檔案。</li></ul><pre><code class="language-nginx">location ~* \.(ogg|ogv|svg|svgz|eot|otf|woff|mp4|ttf|css|rss|atom|js|jpg|jpeg|gif|png|ico|zip|tgz|gz|rar|bz2|doc|xls|exe|ppt|tar|mid|midi|wav|bmp|rtf)$ {
+    expires max;
+    log_not_found off;
+    access_log off;
+}
+</code></pre><ul><li>HTTP2 設定。</li></ul><h3 id="wordpress-plugin">WordPress Plugin</h3><ul><li><a href="https://wordpress.org/plugins/wp-super-cache/">WP Super Cache</a>： WordPress 仰賴的是 php 動態存取資料庫產生出對應的 HTML 頁面呈現，Super Cache 功能先把一些常用的網頁先產出成 Static HTML 檔案暫存起來，讓使用者存取時可以直接存取。依照官網教學安裝方式即可。</li><li><a href="https://wordpress.org/plugins/fast-velocity-minify/">Fast Velocity Minify</a>：把散落各個 plugin 的 css, js merge 並 minify，同時也有將 WordPress 版本號的檔案也一併整理壓縮達到隱藏版本號的效果。</li><li><a href="https://wordpress.org/plugins/wp-smushit/">WP SMush</a>：壓縮上傳的 image，免費版則是每次幫你壓縮 50 張圖片，每次都得自己重複點擊壓縮。</li><li><a href="https://tw.wordpress.org/plugins/all-in-one-seo-pack/">All in One SEO</a>：在我接收以前就已經設定好了，但是也幫助了網站 SEO 評分，每個頁面也都可以設定對應 SEO tag 及 Sitemap 自動產出，大幅提高了網站被搜尋到的排名。</li></ul><h2 id="%E5%AE%89%E5%85%A8%E6%80%A7">安全性</h2><h3 id="nginx">Nginx</h3><pre><code class="language-nginx">location ~* ^/wp-content/uploads/.*.(html|htm|shtml|php|js|swf)$ {
+    deny all;
+}
+
+location ~ /(wp-config|xmlrpc).php$ {
+    deny all;
+}
+
+location ~ /\.ht {
+    deny all;
+}
+
+# 只允許 localhost 可以登入及查看 admin 後台
+location ~ /(wp-admin|wp-login\.php)$ {
+    include snippets/fastcgi-php.conf;
+    fastcgi_pass unix:/run/php/php7.0-fpm.sock;
+    allow 127.0.0.1;
+    deny  all;
+}
+</code></pre><h3 id="ssl">SSL</h3><p>參考 <a href="https://cipherli.st/">Cipherli.st - Strong Ciphers for Apache, nginx and Lighttpd</a>。</p><p>WordPress、Joomla 相關套件大量使用了 iFrame 遷入在 plugin 設定，因此以下這個設定可以看有沒有影響操作斟酌加入設定檔。</p><pre><code>add_header X-Frame-Options DENY;
+</code></pre><h2 id="%E6%B8%AC%E6%95%88%E7%B6%B2%E7%AB%99">測效網站</h2><ul><li><a href="https://gtmetrix.com/">GTMetrix</a>：提供 PageSpeed 和 YSlow 個項目評分，可以查看有哪些可能可以改善的圖片壓縮，或是伺服器沒有設定 cache 等驗證。</li><li><a href="https://developers.google.com/web/tools/lighthouse/">Lighthouse</a>： Google Opensource 的自動化工具，但是滿多都以非常「嚴格」的標準來查看網頁存取速度，也提供了 Progressive Web App 的檢驗。</li></ul><h2 id="%E7%9B%B8%E9%97%9C%E9%80%A3%E7%B5%90">相關連結</h2><ul><li><a href="https://www.digitalocean.com/community/tutorials/how-to-install-linux-nginx-mysql-php-lemp-stack-in-ubuntu-16-04">DigitalOcean - How To Install Linux, Nginx, MySQL, PHP (LEMP stack) in Ubuntu 16.04</a></li><li><a href="https://codex.wordpress.org/Nginx">Wordpress for Nginx config</a></li><li><a href="https://www.nginx.com/blog/9-tips-for-improving-wordpress-performance-with-nginx/">9 Tips for Improving WordPress Performance</a></li><li>WordPress Plugins</li><li><a href="https://wordpress.org/plugins/wp-super-cache/">WP Super Cache</a></li><li><a href="https://wordpress.org/plugins/fast-velocity-minify/">Fast Velocity Minify</a></li><li><a href="https://wordpress.org/plugins/wp-smushit/">WP SMush</a></li><li><a href="https://tw.wordpress.org/plugins/all-in-one-seo-pack/">All in One SEO</a></li><li><a href="https://cipherli.st/">Cipherli.st - Strong Ciphers for Apache, nginx and Lighttpd</a></li></ul>

@@ -1,0 +1,33 @@
+---
+title: "Build Vue project with Travis CI on GitHub Pages"
+slug: "build-vue-project-with-travis-ci-on-github-pages"
+date: "2017-12-22T07:27:00+08:00"
+lastmod: "2021-10-11T07:49:15+08:00"
+draft: false
+tags: ["github", "vue", "travis", "cicd"]
+authors: ["focaaby"]
+featured: false
+custom_excerpt: "Travis.ci 主要於 GitHub 上時常使用到的持續整合工具，也支援了非常多程式語言，如 Node.js, PHP, Java, C, Golang… 等。這次 slide project 透過 vue-cli 了一個小專案，但是每次都必須手動 push 至 GitHub Pages 覺得有點小困擾，本篇透過 Travis 支援 Open Source 專案方式，設置自動部屬於到專案頁面上。"
+excerpt: "Travis.ci 主要於 GitHub 上時常使用到的持續整合工具，也支援了非常多程式語言，如 Node.js, PHP, Java, C, Golang… 等。這次 slide project 透過 vue-cli 了一個小專案，但是每次都必須手動 push 至 GitHub Pages 覺得有點小困擾，本篇透過 Travis 支援 Open Source 專案方式，設置自動部屬於到專案頁面上。"
+description: "Travis.ci 主要於 GitHub 上時常使用到的持續整合工具，也支援了非常多程式語言，如 Node.js, PHP, Java, C, Golang… 等。這次 slide project 透過 vue-cli 了一個小專案，但是每次都必須手動 push 至 GitHub Pages 覺得有點小困擾，本篇透過 Travis 支援 Open Source 專案方式，設置自動部屬於到專案頁面上。"
+reading_time: "2 min read"
+---
+<h2 id="%E5%89%8D%E8%A8%80">前言</h2><p><a href="https://travis-ci.org/">Travis.ci</a> 主要於 <a href="https://github.com/">GitHub</a> 上時常使用到的持續整合工具，也支援了非常多程式語言，如 Node.js, PHP, Java, C, Golang... 等。這次 slide project 透過 <a href="https://github.com/vuejs/vue-cli">vue-cli</a> 了一個小專案，但是每次都必須手動 push 至 GitHub Pages 覺得有點小困擾，本篇透過 Travis 支援 Open Source 專案方式，設置自動部屬於到專案頁面上。</p><h2 id="%E5%BB%BA%E7%AB%8B%E5%B0%88%E6%A1%88">建立專案</h2><h3 id="vue-cli">vue-cli</h3><p>建立 vue 專案，使用的是 webpack 設定檔</p><pre><code class="language-bash">vue init webpack ebook-search
+</code></pre><h3 id="github-%E8%A8%AD%E5%AE%9A-personal-access-tokens">GitHub 設定 Personal access tokens</h3><p>因為必須透過第三方授權讓 Travis 上傳更新 repo，所以必須到設定裡面的 <strong>Developer settings</strong> &gt; <strong>Personal access tokens</strong> 新增一個應用程式。</p><ul><li>取得後的 token 切記保密，請勿上傳至公開頁面，如果有洩漏後，可以至設定頁面重新產一組新的 token。</li></ul><p>{{&lt; img-post path="date" file="00-Github-personal-access-token.png" alt="00-Github-personal-access-token￼" &gt;}}</p><h3 id="%E8%A8%AD%E5%AE%9A-travis-dashboard">設定 Travis Dashboard</h3><p>到 <a href="https://travis-ci.org/">https://travis-ci.org/</a> ，可以透過 Github 帳號登入並啟用專案</p><ul><li><a href="https://travis-ci.org/auth">Travis CI .org</a> 公開專案</li><li><a href="https://travis-ci.com/auth">Travis CI .com</a> 私人專案</li></ul><p>{{&lt; img-post path="date" file="01-select-project.png" alt="01-select-project￼" &gt;}}</p><p>筆者這邊設定只有 <code>.travis.yaml</code> 才會自動啟用，並在環境變數（Environment Variables）加入一個環境變數 <code>GITHUB_TOKEN</code> 儲存剛剛取得的 <strong>Personal access tokens</strong> 避免於 token 洩漏。</p><p>{{&lt; img-post path="date" file="02-active-project.png" alt="02-active-project￼" &gt;}}</p><h3 id="travis-%E8%A8%AD%E5%AE%9A%E6%AA%94">Travis 設定檔</h3><p>語言採用 <code>node_js</code>，安裝步驟主要也只有 <code>npm run build</code> 。</p><pre><code class="language-yaml">language: node_js
+
+node_js:
+  - "8"
+
+install:
+  - npm install
+  - npm run build
+</code></pre><p>翻閱了一下文件，發現 Travis 已經支援自動部屬於 GitHub Pages。</p><pre><code class="language-yaml">deploy:
+  # 將要上傳的目錄設定為 build 完之後的目錄
+  local_dir: ./dist
+  provider: pages
+  skip_cleanup: true
+  github_token: $GITHUB_TOKEN # Set in travis-ci.org dashboard
+  on:
+    branch: master
+</code></pre><h3 id="%E6%B3%A8%E6%84%8F">注意</h3><p>原先預設的 <code>vue-cli</code> <code>config/index.js</code> 裡面有設定 <code>assetsPublicPath</code> 需要改成</p><pre><code class="language-js">assetsPublicPath: './',
+</code></pre><p>因為部屬於 Github Pages，我們所使用的檔案是在當前目錄底下的 <code>static</code>，而非根目錄底下的檔案，需要使用相對目錄才能讀取。</p><h2 id="%E5%B0%8F%E7%B5%90">小結</h2><p>原先以為如果要自動 commit 至另外的 branch 會很複雜，需要重新 clone , push 等過程。看起來 Travis 已經越來越方便，並能支援更多的腳本進行整合，也有看到文件可提供 <code>osx</code> 環境進行測試，讚讚！</p><h2 id="%E5%8F%83%E8%80%83%E9%80%A3%E7%B5%90">參考連結</h2><ol><li><a href="https://docs.travis-ci.com/user/languages/javascript-with-nodejs/">Building a JavaScript and Node.js project</a></li><li><a href="https://docs.travis-ci.com/user/deployment/pages/">GitHub Pages Deployment</a></li></ol>

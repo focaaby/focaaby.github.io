@@ -1,0 +1,30 @@
+---
+title: "How to control your external display brightness on macOS and Arch Linux"
+slug: "how-to-control-your-external-display-brightness-on-macos-and-arch-linux"
+date: "2022-03-14T22:05:33+08:00"
+lastmod: "2022-03-14T22:06:09+08:00"
+draft: false
+tags: ["hardware", "macos", "linux"]
+authors: ["focaaby"]
+featured: false
+custom_excerpt: "本文將介紹如何在 macOS 及 Arch Linux 系統上調整外接螢幕亮度。"
+excerpt: "本文將介紹如何在 macOS 及 Arch Linux 系統上調整外接螢幕亮度。"
+description: "本文將介紹如何在 macOS 及 Arch Linux 系統上調整外接螢幕亮度。"
+feature_image: "https://images.unsplash.com/photo-1588200908342-23b585c03e26?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwxMTc3M3wwfDF8c2VhcmNofDV8fG1vbml0b3J8ZW58MHx8fHwxNjQ3MjY2NzUx&ixlib=rb-1.2.1&q=80&w=2000"
+feature_image_caption: "Photo by <a href=\"https://unsplash.com/@claybanks?utm_source=ghost&utm_medium=referral&utm_campaign=api-credit\">Clay Banks</a> / <a href=\"https://unsplash.com/?utm_source=ghost&utm_medium=referral&utm_campaign=api-credit\">Unsplash</a>"
+reading_time: "3 min read"
+---
+<h2 id="preface">Preface</h2><p>在筆記型電腦上基本上都會內建功能提供調整螢幕亮度(Brightness)。倘若電腦使用了外接螢幕，一般來說僅能透過外接螢幕功能鍵進行調整，而沒辦法使用內建螢幕功能調整外接螢幕。</p><blockquote>有沒有辦法透過在筆記型電腦上直接控制外接螢幕的亮度及音量大小呢？</blockquote><h2 id="ddcci">DDC/CI</h2><p>首先，在作業系統上是否有相關界面可以對外接螢幕進操作。根據 Wiki，2016 年後螢幕多數都已經支援了 <a href="https://en.wikipedia.org/wiki/Display_Data_Channel#DDC.2FCI">Display Data Channel Command Interface（DDC/CI）</a> [1]：提供了由電腦與螢幕顯示溝通的訊號界面，並可以透過軟體定義調整外接螢幕亮度。</p><h2 id="macos">macOS</h2><p>在 macOS 環境中，使用 <a href="https://github.com/MonitorControl/MonitorControl">MonitorControl</a> [2] 來調整外接螢幕亮度。以下使用外接螢幕 LG 32ML600M 測試，可以觀察到外接螢幕音軌進行調整。</p><figure class="kg-card kg-image-card"><img src="/content/images/2022/03/macos-ddc-volume.png" class="kg-image" alt loading="lazy" width="1280" height="960" srcset="/content/images/size/w600/2022/03/macos-ddc-volume.png 600w, /content/images/size/w1000/2022/03/macos-ddc-volume.png 1000w, /content/images/2022/03/macos-ddc-volume.png 1280w" sizes="(min-width: 720px) 720px"></figure><p>此外，macOS 系統已經提供內建螢幕及外接螢幕明亮，於 <a href="https://github.com/MonitorControl/MonitorControl/discussions/596">MonitorControl 4.0.0</a> [3] 後提供了同步內建螢幕與外接螢幕亮度功能。</p><figure class="kg-card kg-image-card"><img src="/content/images/2022/03/macos-ddc-monitorcontrol-sync.png" class="kg-image" alt loading="lazy" width="1460" height="1104" srcset="/content/images/size/w600/2022/03/macos-ddc-monitorcontrol-sync.png 600w, /content/images/size/w1000/2022/03/macos-ddc-monitorcontrol-sync.png 1000w, /content/images/2022/03/macos-ddc-monitorcontrol-sync.png 1460w" sizes="(min-width: 720px) 720px"></figure><p>當然，需要注意若習慣將 macbook 關閉上蓋，環境光度感測器（ambient light sensor）就不會自動感測而變化外接螢幕亮度。</p><h2 id="linuxarch-linux">Linux - Arch Linux</h2><p>Linux 環境則可以使用 <a href="https://www.kernel.org/doc/Documentation/i2c/dev-interface">i2c-dev</a> [4] 或 <a href="https://gitlab.com/ddcci-driver-linux/ddcci-driver-linux">ddcci-driver-linux</a> [5] 整合。</p><ul><li><a href="https://www.kernel.org/doc/Documentation/i2c/dev-interface">i2c-dev</a> ：原生 kernel 已經支援，僅需要設定 <code>/etc/modules-load.d</code> 使 kernel 開機時載入即可，參考 <a href="https://www.ddcutil.com/kernel_module/">ddcutil kernel module 設置</a> [6]。</li></ul><p>最終目的希望透過桌面環境調整外接螢幕，以下為我的 Arch Linux 環境資訊：</p><pre><code>$ uname -a
+Linux nuc-arch 5.16.14-arch1-1 #1 SMP PREEMPT Fri, 11 Mar 2022 17:40:36 +0000 x86_64 GNU/Linux
+
+$ plasmashell -v     
+plasmashell 5.24.3
+
+$ kf5-config --version
+Qt: 5.15.3
+KDE Frameworks: 5.92.0
+kf5-config: 1.0
+</code></pre><p>由於使用了 Arch Linux KDE Plasma 環境中整合，其 Plasma <a href="https://docs.kde.org/stable5/en/powerdevil/kcontrol/powerdevil/index.html">PowerDevil</a> [7] module 提供電源管理控制，其包含螢幕亮度及裝置電源等。</p><p>不過目前 <a href="https://github.com/KDE/powerdevil/blob/master/CMakeLists.txt#L67-L78">PowerDevil 套件預設</a> [8] 將 <code>ddcutil</code>（<code>-DHAVE_DDCUTIL=Off</code>）關閉，故需要手動編譯啟用 <code>ddcutil</code>功能。</p><p>當然 Arch user 維護了 <a href="https://aur.archlinux.org/packages/powerdevil-ddcutil">powerdevil-ddcutil AUR</a> [9] 提供大家使用：</p><pre><code>$ sudo gpasswd -a $USER i2c
+$ sudo sh -c 'echo i2c-dev &gt; /etc/modules-load.d/ddc.conf'
+$ sudo reboot
+</code></pre><p>重起後，KDE Plasma 順利地直接調整外接螢幕：</p><figure class="kg-card kg-image-card"><img src="/content/images/2022/03/kde-ddc.png" class="kg-image" alt loading="lazy" width="1920" height="1080" srcset="/content/images/size/w600/2022/03/kde-ddc.png 600w, /content/images/size/w1000/2022/03/kde-ddc.png 1000w, /content/images/size/w1600/2022/03/kde-ddc.png 1600w, /content/images/2022/03/kde-ddc.png 1920w" sizes="(min-width: 720px) 720px"></figure><h2 id="references">References</h2><ol><li><a href="https://en.wikipedia.org/wiki/Display_Data_Channel#DDC.2FCI">Display Data Channel Command Interface（DDC/CI）</a></li><li><a href="https://github.com/MonitorControl/MonitorControl">MonitorControl</a></li><li><a href="https://github.com/MonitorControl/MonitorControl/discussions/596">MonitorControl 4.0.0</a></li><li><a href="https://www.kernel.org/doc/Documentation/i2c/dev-interface">i2c-dev</a></li><li><a href="https://gitlab.com/ddcci-driver-linux/ddcci-driver-linux">ddcci-driver-linux</a></li><li><a href="https://www.ddcutil.com/kernel_module/">ddcutil kernel module 設置</a></li><li><a href="https://docs.kde.org/stable5/en/powerdevil/kcontrol/powerdevil/index.html">PowerDevil</a></li><li><a href="https://github.com/KDE/powerdevil/blob/master/CMakeLists.txt#L67-L78">PowerDevil 套件預設</a></li><li><a href="https://aur.archlinux.org/packages/powerdevil-ddcutil">powerdevil-ddcutil AUR</a></li></ol>

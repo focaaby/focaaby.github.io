@@ -1,0 +1,17 @@
+---
+title: "Calculator in Ubuntu 18.04 GNOME search"
+slug: "calculator-in-ubuntu-18-04-gnome-search"
+date: "2019-01-12T08:00:00+08:00"
+lastmod: "2021-10-11T07:24:55+08:00"
+draft: false
+tags: ["ubuntu"]
+authors: ["focaaby"]
+featured: false
+excerpt: "前言\n看到 gslin 大大的直接在-ubuntu-的-unity-上直接計算\n[https://blog.gslin.org/archives/2018/12/17/8638/%E7%9B%B4%E6%8E%A5%E5%9C%A8-ubuntu-%E7%9A%84-unity-%E4%B8%8A%E7%9B%B4%E6%8E%A5%E8%A8%88%E7%AE%97/]\n，後來想到 Ubuntu 18.04 應該也要有這功能才對，於是就找了一下。\n\n過程\n在 18.04"
+description: "前言\n看到 gslin 大大的直接在-ubuntu-的-unity-上直接計算\n[https://blog.gslin.org/archives/2018/12/17/8638/%E7%9B%B4%E6%8E%A5%E5%9C%A8-ubuntu-%E7%9A%84-unity-%E4%B8%8A%E7%9B%B4%E6%8E%A5%E8%A8%88%E7%AE%97/]\n，後來想到 Ubuntu 18.04 應該也要有這功能才對，於是就找了一下。\n\n過程\n在 18.04"
+reading_time: "1 min read"
+---
+<h2 id="%E5%89%8D%E8%A8%80">前言</h2><p>看到 gslin 大大的<a href="https://blog.gslin.org/archives/2018/12/17/8638/%E7%9B%B4%E6%8E%A5%E5%9C%A8-ubuntu-%E7%9A%84-unity-%E4%B8%8A%E7%9B%B4%E6%8E%A5%E8%A8%88%E7%AE%97/">直接在-ubuntu-的-unity-上直接計算</a>，後來想到 Ubuntu 18.04 應該也要有這功能才對，於是就找了一下。</p><h2 id="%E9%81%8E%E7%A8%8B">過程</h2><p>在 18.04 desktop 預設是用 GNOME 作為 GUI 介面，並使用了 Snap 安裝預設套件， 包含了 <code>GNOME</code> 及 <code>計算機</code> 等相關套件。</p><figure class="kg-card kg-image-card"><img src="/content/images/2021/10/snap-list.png" class="kg-image" alt loading="lazy" width="2560" height="1385"></figure><p>但是透過 snap 安裝的一些套件，缺少了一些功能。</p><pre><code class="language-bash">// 移除透過 snap 安裝 calculator 並重新透過 apt 重新安裝
+sudo snap remove gnome-calculator
+sudo apt install gnome-calculator
+</code></pre><p>可以在 dash 計算了～</p><figure class="kg-card kg-image-card"><img src="/content/images/2021/10/calculator-in-dash.png" class="kg-image" alt loading="lazy" width="2560" height="1440"></figure><h2 id="%E7%9B%B8%E9%97%9C%E9%80%A3%E7%B5%90">相關連結</h2><ul><li><a href="https://askubuntu.com/questions/1062973/built-in-calculator-to-gnome-search-window">built-in-calculator-to-gnome-search-window</a></li></ul>

@@ -1,0 +1,35 @@
+{{ define "body_class" }}{{ if gt .Paginator.PageNumber 1 }}paged{{ else }}home-template{{ end }}{{ end }}
+{{ define "main" }}
+{{- $pager := .Paginate (where site.RegularPages "Section" "posts") -}}
+{{- if eq $pager.PageNumber 1 }}
+    <div class="site-header-content">
+        {{ with site.Params.cover_image }}
+            <img class="site-header-cover"
+                srcset="{{ partial "img_url.html" (dict "src" . "size" "s") }} 300w,
+                        {{ partial "img_url.html" (dict "src" . "size" "m") }} 600w,
+                        {{ partial "img_url.html" (dict "src" . "size" "l") }} 1000w,
+                        {{ partial "img_url.html" (dict "src" . "size" "xl") }} 2000w"
+                sizes="100vw"
+                src="{{ partial "img_url.html" (dict "src" . "size" "xl") }}"
+                alt=""
+            />
+        {{ end }}
+        <h1 class="site-title">
+                {{ site.Title }}
+        </h1>
+        <p>{{ site.Params.description }}</p>
+    </div>
+{{- end }}
+
+<main id="site-main" class="site-main outer">
+    <div class="inner posts">
+
+        <div class="post-feed">
+            {{ range $i, $p := $pager.Pages }}
+                {{ partial "post-card.html" (dict "page" $p "large" (and (eq $pager.PageNumber 1) (eq $i 0) $p.Params.feature_image)) }}
+            {{ end }}
+        </div>
+
+    </div>
+</main>
+{{ end }}

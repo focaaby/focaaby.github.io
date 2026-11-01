@@ -1,0 +1,85 @@
+---
+title: "Create Let's Encrypt Wildcard Certificate With BIND DNS server"
+slug: "create-lets-encrypt-wildcard-certificate-with-bind"
+date: "2018-03-25T08:00:00+08:00"
+lastmod: "2021-10-11T07:22:31+08:00"
+draft: false
+tags: ["letencrypt", "bind"]
+authors: ["focaaby"]
+featured: false
+custom_excerpt: "本文介紹如何利用 certbot 建立 Let's Encrypt Wildcard Certificate"
+excerpt: "本文介紹如何利用 certbot 建立 Let's Encrypt Wildcard Certificate"
+description: "本文介紹如何利用 certbot 建立 Let's Encrypt Wildcard Certificate"
+reading_time: "2 min read"
+---
+<h2 id="%E5%89%8D%E8%A8%80">前言</h2><p><a href="https://letsencrypt.org/2017/07/06/wildcard-certificates-coming-jan-2018.html">去年暑假</a> Let's Encrypt 公告了 2018 年將會提供 Wildcard Certificate，不過有一些些的小遲到了會～本篇將會介紹如何利用 <code>certbot</code> 來申請 Let's Encrypt Wildcard Certificate。</p><h2 id="%E5%8B%95%E6%89%8B%E5%81%9A">動手做</h2><p>在開始之前先確定 <code>certbot</code> 版本，Wildcard 功能是在 0.22 之後才能使用的</p><pre><code class="language-bash">certbot --version
+certbot 0.22.2
+</code></pre><h3 id="%E6%8C%87%E4%BB%A4">指令</h3><pre><code class="language-bash">sudo certbot certonly --manual -d *.example.com --agree-tos --manual-public-ip-logging-ok --preferred-challenges dns-01 --server https://acme-v02.api.letsencrypt.org/directory
+</code></pre><p>輸入你的信箱</p><pre><code class="language-bash">Saving debug log to /var/log/letsencrypt/letsencrypt.log
+Plugins selected: Authenticator manual, Installer None
+Enter email address (used for urgent renewal and security notices) (Enter 'c' to
+cancel): example@gmail.com
+</code></pre><p>修改 DNS 伺服器設定 TXT 紀錄</p><pre><code class="language-bash">-------------------------------------------------------------------------------
+Please deploy a DNS TXT record under the name
+_acme-challenge.example.com with the following value:
+
+BOqn-vN6icpDeCpVoHirabJ72ctuOrEbAUKy3EE_XcE
+
+Before continuing, verify the record is deployed.
+</code></pre><p>筆者這邊是自己的 DNS server（<code>bind</code>），在設定檔加入</p><pre><code>_acme-challenge         IN      TXT     "BOqn-vN6icpDeCpVoHirabJ72ctuOrEbAUKy3EE_XcE"
+</code></pre><p>利用 <code>nslookup</code> 檢查 DNS 設定，確認後按下 <code>Enter</code> 繼續下一步驟</p><pre><code class="language-bash">$ nslookup -q=TXT _acme-challenge.example.com
+
+Server:		192.168.123.1
+Address:	192.168.123.1#53
+
+Non-authoritative answer:
+_acme-challenge.example.com	text = "BOqn-vN6icpDeCpVoHirabJ72ctuOrEbAUKy3EE_XcE"
+</code></pre><pre><code class="language-bash">-------------------------------------------------------------------------------
+Press Enter to Continue
+Waiting for verification...
+Cleaning up challenges
+
+IMPORTANT NOTES:
+ - Congratulations! Your certificate and chain have been saved at:
+   /etc/letsencrypt/live/example.com/fullchain.pem
+   Your key file has been saved at:
+   /etc/letsencrypt/live/example.com/privkey.pem
+   Your cert will expire on 2018-06-23. To obtain a new or tweaked
+   version of this certificate in the future, simply run certbot
+   again. To non-interactively renew *all* of your certificates, run
+   "certbot renew"
+ - If you like Certbot, please consider supporting our work by:
+
+   Donating to ISRG / Let's Encrypt:   https://letsencrypt.org/donate
+   Donating to EFF:                    https://eff.org/donate-le
+
+</code></pre><p>Nginx 網站設定檔</p><pre><code class="language-nginx">server {
+    if ($host = www.example.com) {
+        return 301 https://$host$request_uri;
+    } # managed by Certbot
+    listen 80;
+    listen [::]:80;
+    server_name www.example.com;
+    return 301 https://$host$request_uri;
+}
+
+server {
+    listen 443 ssl http2;
+    listen [::]:443 ssl http2;
+
+    server_name www.example.com;
+    server_name_in_redirect off;
+
+    access_log /var/log/nginx/example_com.access_log;
+    error_log /var/log/nginx/example_com.error_log info;
+
+    root /var/www/example_com;
+    index index.html index.htm default.html default.htm;
+
+    ssl_certificate /etc/letsencrypt/live/example.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/example.com/privkey.pem;
+    include /etc/letsencrypt/options-ssl-nginx.conf;
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
+
+}
+</code></pre><h2 id="%E5%8F%83%E8%80%83%E4%BE%86%E6%BA%90">參考來源</h2><ol><li><a href="https://letsencrypt.org/2017/07/06/wildcard-certificates-coming-jan-2018.html">https://letsencrypt.org/2017/07/06/wildcard-certificates-coming-jan-2018.html</a></li><li><a href="http://forum.centos-webpanel.com/dns/bind-dns-record-examples/">http://forum.centos-webpanel.com/dns/bind-dns-record-examples/</a></li><li><a href="https://sinkcup.github.io/letsencrypt-wildcard-certificate">https://sinkcup.github.io/letsencrypt-wildcard-certificate</a></li></ol>

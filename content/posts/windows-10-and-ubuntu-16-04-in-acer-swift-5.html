@@ -1,0 +1,14 @@
+---
+title: "Windows 10 and Ubuntu 16.04 in Acer Swift 5"
+slug: "windows-10-and-ubuntu-16-04-in-acer-swift-5"
+date: "2017-05-09T08:00:00+08:00"
+lastmod: "2021-10-11T06:15:38+08:00"
+draft: false
+tags: ["windows", "ubuntu", "uefi", "dualboot"]
+authors: ["focaaby"]
+featured: false
+excerpt: "前言\n最近幫家人買了一台筆電，Acer Swift 5，型號是 SF514-51-50YK 基本上主打輕薄而且規格 i5 第七代的 CPU，512 SSD，CP\n值滿高的 由於老哥多半使用 R language 來進行一些資料分析，需要雙系統，於是乎有了一連串的 debug time\n\n安裝步驟\nStep 1\n首先進入 BIOS 設定 Boot Mode， Windows 會提醒你「在 windows 8 或較新的版本都已經使用 UEFT\n模式，請勿更動。」，接下來關閉 Secure Boot。\n\nStep 2\n由於原先是整顆硬碟為 windows 10，將硬碟壓縮看要分割多少空間給 Ubuntu，"
+description: "前言\n最近幫家人買了一台筆電，Acer Swift 5，型號是 SF514-51-50YK 基本上主打輕薄而且規格 i5 第七代的 CPU，512 SSD，CP\n值滿高的 由於老哥多半使用 R language 來進行一些資料分析，需要雙系統，於是乎有了一連串的 debug time\n\n安裝步驟\nStep 1\n首先進入 BIOS 設定 Boot Mode， Windows 會提醒你「在 windows 8 或較新的版本都已經使用 UEFT\n模式，請勿更動。」，接下來關閉 Secure Boot。\n\nStep 2\n由於原先是整顆硬碟為 windows 10，將硬碟壓縮看要分割多少空間給 Ubuntu，"
+reading_time: "2 min read"
+---
+<h2 id="%E5%89%8D%E8%A8%80">前言</h2><p>最近幫家人買了一台筆電，Acer Swift 5，型號是 SF514-51-50YK 基本上主打輕薄而且規格 i5 第七代的 CPU，512 SSD，CP 值滿高的 由於老哥多半使用 R language 來進行一些資料分析，需要雙系統，於是乎有了一連串的 debug time</p><h2 id="%E5%AE%89%E8%A3%9D%E6%AD%A5%E9%A9%9F">安裝步驟</h2><h3 id="step-1">Step 1</h3><p>首先進入 BIOS 設定 Boot Mode， Windows 會提醒你「在 windows 8 或較新的版本都已經使用 UEFT 模式，請勿更動。」，接下來關閉 Secure Boot。</p><h3 id="step-2">Step 2</h3><p>由於原先是整顆硬碟為 windows 10，將硬碟壓縮看要分割多少空間給 Ubuntu，我這邊規劃為 100 GB windows 10，剩下空間都給 Ubuntu。</p><p>分割好之後，再來處理的是 windows 8 之後出現的「快速啟動」。 如果 windows 的「快速啟動」功能是開啟的時候，會導致無法進入 Ubuntu 的開機程式 grub。</p><p>「快速啟動」的位置於： -&gt; 開啟控制台 -&gt; 電源選項 -&gt; 選擇按下按鈕時的行為 -&gt; 變更無法使用的設定 -&gt; <strong>取消勾選</strong> 開啟快速啟動（建議選項） -&gt; 儲存變更</p><h3 id="step-3">Step 3</h3><p>筆者這邊預先已經先安裝 Ubuntu live USB 了，我們可以直接進行安裝動作。</p><p>理論上，Ubuntu 的 grub 都會幫你重新整理好開機選單，便能選擇所使用 OS，但往往在這一步驟中總會有些小驚喜，畢竟是 Windows（？</p><p>上網查了許多資料，整理歸納如以下解法：</p><ol><li>進入 BIOS，如果開機順序中可以選擇 Ubuntu 則調整順序為第一開機優先。若無選單可以選擇，則進行第二種解法。</li><li>開機進入 Windows 之後，使用 <strong>管理者權限</strong> 開啟命令提示字元，輸入 <code>bcdedit /set {bootmgr} path \EFI\ubuntu\grubx64.efi</code> 將 Windows 原先開機程式替換成 Ubuntu 的 grub 位置。</li></ol><h2 id="%E8%A7%A3%E6%B1%BA%E6%96%B9%E6%A1%88">解決方案</h2><p>開機後，進入還原模式看到以下畫面後，點選命令提示字元並輸入上方第二點的方式則可以解決問題</p><figure class="kg-card kg-image-card kg-card-hascaption"><img src="/content/images/2021/10/cmd.jpg" class="kg-image" alt loading="lazy" width="4032" height="3024"><figcaption>進階選項畫面</figcaption></figure><h2 id="%E5%BE%8C%E8%A8%98">後記</h2><p>漂亮的 Acer Swift 5，看的我也好想買新筆電了 XD</p><figure class="kg-card kg-image-card kg-card-hascaption"><img src="/content/images/2021/10/swift5.jpg" class="kg-image" alt loading="lazy" width="4032" height="3024"><figcaption>Swift 5 本人</figcaption></figure>

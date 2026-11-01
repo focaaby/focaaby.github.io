@@ -1,0 +1,14 @@
+---
+title: "Windows multiple network card implement on VirtualBox"
+slug: "windows-multiple-network-card-implement-on-virtualbox"
+date: "2017-05-09T08:00:00+08:00"
+lastmod: "2021-10-11T06:12:02+08:00"
+draft: false
+tags: ["windows", "virtualbox", "network"]
+authors: ["focaaby"]
+featured: false
+excerpt: "前言\n由於學校實驗室為了限制網路，因此每一台電腦都需要設定一 Static IP 才能對外連線。原先我們將 server\n再接至到一台分享器就解決了這個問題，但又因為希望裡面有一台虛擬機器可以有一 Public IP，因此有了這個「特別」的解法。\n\n事前準備\n * 兩張網路卡\n * 申請一組 Public IP 及對應 MAC Address\n\nStep 1\n開啟 控制台 -> 網路和網際網路 -> 網路連線\n\n控制台Step 2\n找到對應的網卡後，點選右鍵內容並進入設定，可以看到下方圖示修改 Locally Administered Address ，輸入欄位則是輸入自己想要變動的\nMAC Address\n\nStep 3\n回到設定，就可以將我們的 Public IP"
+description: "前言\n由於學校實驗室為了限制網路，因此每一台電腦都需要設定一 Static IP 才能對外連線。原先我們將 server\n再接至到一台分享器就解決了這個問題，但又因為希望裡面有一台虛擬機器可以有一 Public IP，因此有了這個「特別」的解法。\n\n事前準備\n * 兩張網路卡\n * 申請一組 Public IP 及對應 MAC Address\n\nStep 1\n開啟 控制台 -> 網路和網際網路 -> 網路連線\n\n控制台Step 2\n找到對應的網卡後，點選右鍵內容並進入設定，可以看到下方圖示修改 Locally Administered Address ，輸入欄位則是輸入自己想要變動的\nMAC Address\n\nStep 3\n回到設定，就可以將我們的 Public IP"
+reading_time: "2 min read"
+---
+<h2 id="%E5%89%8D%E8%A8%80">前言</h2><p>由於學校實驗室為了限制網路，因此每一台電腦都需要設定一 Static IP 才能對外連線。原先我們將 server 再接至到一台分享器就解決了這個問題，但又因為希望裡面有一台虛擬機器可以有一 Public IP，因此有了這個「特別」的解法。</p><h3 id="%E4%BA%8B%E5%89%8D%E6%BA%96%E5%82%99">事前準備</h3><ul><li>兩張網路卡</li><li>申請一組 Public IP 及對應 MAC Address</li></ul><h3 id="step-1">Step 1</h3><p>開啟 <code>控制台</code> -&gt; <code>網路和網際網路</code> -&gt; <code>網路連線</code></p><figure class="kg-card kg-image-card kg-card-hascaption"><img src="/content/images/2021/10/01-ether-network-4.png" class="kg-image" alt loading="lazy" width="1127" height="637"><figcaption>控制台</figcaption></figure><h3 id="step-2">Step 2</h3><p>找到對應的網卡後，點選右鍵<code>內容</code>並進入<code>設定</code>，可以看到下方圖示修改 <code>Locally Administered Address</code> ，輸入欄位則是輸入自己想要變動的 MAC Address</p><figure class="kg-card kg-image-card"><img src="/content/images/2021/10/02-locally-administered-address.png" class="kg-image" alt loading="lazy" width="467" height="518"></figure><h3 id="step-3">Step 3</h3><p>回到<code>設定</code>，就可以將我們的 Public IP 綁定到網卡上面</p><figure class="kg-card kg-image-card"><img src="/content/images/2021/10/03-static-ip-setting.png" class="kg-image" alt loading="lazy" width="901" height="532"></figure><h3 id="step-4">Step 4</h3><p>在 Virtual Box 上面，這裡選擇的是 <code>Network Bridge</code> 的模式，並且選擇剛剛綁定對外的網路卡</p><figure class="kg-card kg-image-card"><img src="/content/images/2021/10/04-virtualbox-networking-setting.png" class="kg-image" alt loading="lazy" width="679" height="425"></figure><h3 id="step-5">Step 5</h3><p>在虛擬機器上面，設定 MAC Address 及 Public IP</p><figure class="kg-card kg-image-card"><img src="/content/images/2021/10/05-ubuntu-mac-address.png" class="kg-image" alt loading="lazy" width="1920" height="1080"></figure><figure class="kg-card kg-image-card"><img src="/content/images/2021/10/06-ubuntu-static-ip.png" class="kg-image" alt loading="lazy" width="1920" height="1080"></figure>

@@ -1,0 +1,80 @@
+---
+title: "Why Linux OS takes over 5 minutes during boot-up process"
+slug: "why-linux-os-takes-over-5-minutes-during-boot-up-process"
+date: "2022-02-15T06:28:56+08:00"
+lastmod: "2022-02-15T06:28:56+08:00"
+draft: false
+tags: []
+authors: ["focaaby"]
+featured: false
+custom_excerpt: "In this article, I would show you how to find which systemd unit might lead the boot-up times through `systemd-analyze`[1] command.\n"
+excerpt: "In this article, I would show you how to find which systemd unit might lead the boot-up times through `systemd-analyze`[1] command."
+description: "In this article, I would show you how to find which systemd unit might lead the boot-up times through `systemd-analyze`[1] command.\n"
+feature_image: "https://images.unsplash.com/photo-1498184103684-bc1a70b0c068?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwxMTc3M3wwfDF8c2VhcmNofDR8fHdhaXRpbmd8ZW58MHx8fHwxNjQ0ODc3Njk5&ixlib=rb-1.2.1&q=80&w=2000"
+feature_image_caption: "Photo by <a href=\"https://unsplash.com/@benwhitephotography?utm_source=ghost&utm_medium=referral&utm_campaign=api-credit\">Ben White</a> / <a href=\"https://unsplash.com/?utm_source=ghost&utm_medium=referral&utm_campaign=api-credit\">Unsplash</a>"
+reading_time: "4 min read"
+---
+<h2 id="problem">Problem</h2><p>As the following output of <code>journalctl</code> command, we can view the network unit takes around 5 minutes between initial the LSB and failed to start:</p><ul><li>Jun 01 15:59:45: <code>Starting LSB: Bring up/down networking...</code></li><li>Jun 01 16:04:45: <code>Failed to start LSB: Bring up/down networking.</code></li></ul><pre><code>$ journalctl --unit=network
+-- Logs begin at Tue 2021-06-01 15:59:40 UTC, end at Tue 2021-06-01 16:05:37 UTC. --
+Jun 01 15:59:45 ip-172-31-29-127.eu-west-1.compute.internal systemd[1]: Starting LSB: Bring up/down networking...
+Jun 01 15:59:45 ip-172-31-29-127.eu-west-1.compute.internal network[666]: Bringing up loopback interface:  [  OK  ]
+Jun 01 15:59:45 ip-172-31-29-127.eu-west-1.compute.internal network[666]: Bringing up interface eth0:
+Jun 01 15:59:45 ip-172-31-29-127.eu-west-1.compute.internal dhclient[789]: DHCPREQUEST on eth0 to 255.255.255.255 port 67 (xid=0x7487dbae)
+Jun 01 15:59:45 ip-172-31-29-127.eu-west-1.compute.internal dhclient[789]: DHCPACK from 172.31.16.1 (xid=0x7487dbae)
+Jun 01 15:59:47 ip-172-31-29-127.eu-west-1.compute.internal NET[833]: /usr/sbin/dhclient-script : updated /etc/resolv.conf
+Jun 01 15:59:47 ip-172-31-29-127.eu-west-1.compute.internal network[666]: Determining IP information for eth0... done.
+Jun 01 15:59:48 ip-172-31-29-127.eu-west-1.compute.internal dhclient[856]: XMT: Solicit on eth0, interval 1020ms.
+Jun 01 15:59:49 ip-172-31-29-127.eu-west-1.compute.internal dhclient[856]: XMT: Solicit on eth0, interval 2120ms.
+Jun 01 15:59:51 ip-172-31-29-127.eu-west-1.compute.internal dhclient[856]: XMT: Solicit on eth0, interval 4450ms.
+Jun 01 15:59:55 ip-172-31-29-127.eu-west-1.compute.internal dhclient[856]: XMT: Solicit on eth0, interval 9080ms.
+Jun 01 16:00:05 ip-172-31-29-127.eu-west-1.compute.internal dhclient[856]: XMT: Solicit on eth0, interval 18980ms.
+Jun 01 16:00:24 ip-172-31-29-127.eu-west-1.compute.internal dhclient[856]: XMT: Solicit on eth0, interval 37130ms.
+Jun 01 16:01:01 ip-172-31-29-127.eu-west-1.compute.internal dhclient[856]: XMT: Solicit on eth0, interval 77810ms.
+Jun 01 16:02:19 ip-172-31-29-127.eu-west-1.compute.internal dhclient[856]: XMT: Solicit on eth0, interval 113620ms.
+Jun 01 16:04:12 ip-172-31-29-127.eu-west-1.compute.internal dhclient[856]: XMT: Solicit on eth0, interval 35520ms.
+Jun 01 16:04:45 ip-172-31-29-127.eu-west-1.compute.internal systemd[1]: network.service start operation timed out. Terminating.
+Jun 01 16:04:45 ip-172-31-29-127.eu-west-1.compute.internal systemd[1]: Failed to start LSB: Bring up/down networking.
+Jun 01 16:04:45 ip-172-31-29-127.eu-west-1.compute.internal systemd[1]: Unit network.service entered failed state.
+Jun 01 16:04:45 ip-172-31-29-127.eu-west-1.compute.internal systemd[1]: network.service failed.
+Jun 01 16:04:48 ip-172-31-29-127.eu-west-1.compute.internal network[666]: Determining IPv6 information for eth0... failed.
+Jun 01 16:04:48 ip-172-31-29-127.eu-west-1.compute.internal network[666]: WARN      : [/etc/sysconfig/network-scripts/ifup-eth] Unable to obtain IPv6 DHCP address eth0.
+</code></pre><h2 id="find-the-systemd-unit-that-take-a-long-time">Find the systemd unit that take a long time</h2><p>In this case, we can use <code>systemd-analyze blame</code> command to show a list of all running units, ordered by the time they took to initialize.</p><pre><code>$ sudo systemd-analyze blame
+  5min 115ms network.service
+      3.866s dev-xvda1.device
+      3.101s cloud-init-local.service
+      1.206s cloud-init.service
+</code></pre><p>From the output message of <code>systemd-analyze blame</code>, we can know the <code>network.service</code> take around 5 min. Moreover, we also can check the configuration of <code>network.service</code> that defined the <code>TimeoutSec=5min</code> by default[2].</p><pre><code>$ sudo systemctl edit --full network.service
+...
+...
+[Service]
+Type=forking
+Restart=no
+TimeoutSec=5min
+IgnoreSIGPIPE=no
+KillMode=process
+GuessMainPID=no
+RemainAfterExit=yes
+ExecStart=/etc/rc.d/init.d/network start
+ExecStop=/etc/rc.d/init.d/network stop
+
+</code></pre><p>This means that <code>network.service</code> might be waiting for something and cause the timeout. Therefore, we should check the networking configurations.</p><pre><code>$ cat /etc/sysconfig/network-scripts/ifcfg-ens5 
+
+# Created by cloud-init on instance boot automatically, do not edit.
+#
+BOOTPROTO=dhcp
+DEVICE=ens5
+DHCPV6C=yes
+IPV6INIT=yes
+ONBOOT=yes
+TYPE=Ethernet
+USERCTL=no
+</code></pre><p>From this configuration of the interface <code>ens5</code>, we can know IPv6 address is enabled. However, the configurations in <code>/etc/sysconfig/network-scripts</code> are created by cloud-init on instance boot automatically.</p><p>By checking the configurations in <code>/etc/cloud/cloud.cfg.d/</code>, we can confirm the IPv6 address is enabled in cloud-init.</p><pre><code>...
+    network:
+      version: 1
+      config:
+      - type: physical
+        name: eth0
+        subnets:
+          - type: dhcp
+          - type: dhcp6
+</code></pre><p>In the meantime, I can view the VPC did not be enabled the IPv6 support[3].</p><h2 id="summary">Summary</h2><p>If we enable the IPv6 at the Linux OS level, but we don't enable IPv6 support for your VPC and resources. During the boot-up process, <code>network.unit</code> would like to retrieve IPv6 IP address and wait for DHCP server for 5 min. After the timeout period, the <code>systemd.unit</code> would continue the process, and cause a slow boot-up time over 5 minutes.</p><h2 id="references">References</h2><ol><li><a href="https://www.freedesktop.org/software/systemd/man/systemd-analyze.html">https://www.freedesktop.org/software/systemd/man/systemd-analyze.html</a></li><li><a href="https://www.freedesktop.org/software/systemd/man/systemd.service.html">https://www.freedesktop.org/software/systemd/man/systemd.service.html</a></li><li>Get started with IPv6 for Amazon VPC - <a href="https://docs.aws.amazon.com/vpc/latest/userguide/get-started-IPv6.html">https://docs.aws.amazon.com/vpc/latest/userguide/get-started-IPv6.html</a></li></ol>

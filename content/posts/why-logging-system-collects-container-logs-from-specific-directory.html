@@ -1,0 +1,56 @@
+---
+title: "Why logging system collects container logs from specific directory"
+slug: "why-logging-system-collects-container-logs-from-specific-directory"
+date: "2022-03-05T00:00:02+08:00"
+lastmod: "2022-03-05T00:00:02+08:00"
+draft: false
+tags: ["kubernetes", "logging"]
+authors: ["focaaby"]
+featured: false
+custom_excerpt: "本文章介紹了常見 Kubernetes Logging 架構，並解探討了為了使用 Node Agent 架構模式上為何收集 /var/log/containers/ 目錄內的 log 而非其他目錄。"
+excerpt: "本文章介紹了常見 Kubernetes Logging 架構，並解探討了為了使用 Node Agent 架構模式上為何收集 /var/log/containers/ 目錄內的 log 而非其他目錄。"
+description: "本文章介紹了常見 Kubernetes Logging 架構，並解探討了為了使用 Node Agent 架構模式上為何收集 /var/log/containers/ 目錄內的 log 而非其他目錄。"
+feature_image: "https://images.unsplash.com/photo-1456255985051-dcbc4f615823?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwxMTc3M3wwfDF8c2VhcmNofDQ0fHxsb2d8ZW58MHx8fHwxNjQ2NDA5NDk3&ixlib=rb-1.2.1&q=80&w=2000"
+feature_image_caption: "Photo by <a href=\"https://unsplash.com/@rgrzybowski?utm_source=ghost&utm_medium=referral&utm_campaign=api-credit\">Radek Grzybowski</a> / <a href=\"https://unsplash.com/?utm_source=ghost&utm_medium=referral&utm_campaign=api-credit\">Unsplash</a>"
+reading_time: "4 min read"
+---
+<h2 id="logging-architecture">Logging Architecture</h2><p>根據 Kubernetes Logging Architecture[1] 文件，大致上分為兩類 node-level 及 cluster-level：</p><h3 id="logging-at-the-node-level">Logging at the node level</h3><p> node-level 透過 logrotate 命令或是 kubelet <a href="https://kubernetes.io/docs/reference/config-api/kubelet-config.v1beta1/#kubelet-config-k8s-io-v1beta1-KubeletConfiguration"> containerLogMaxSize 及 containerLogMaxFiles 參數</a> rotate log。</p><figure class="kg-card kg-image-card"><img src="/content/images/2022/03/image.png" class="kg-image" alt loading="lazy" width="500" height="300"></figure><p></p><h3 id="cluster-level-logging-architectures">Cluster-level logging architectures</h3><p> cluster-level 使用以下三種方式實現：</p><h4 id="using-a-node-logging-agent">Using a node logging agent</h4><p>於每一個節點上接部署 Logging Agent 收集 application log 並上傳回 logging 系統。例如：Flutend 或是 Grafana Loki 都是比較接近這種方式，於每一個節點透過 DaemonSet 部署方式，等同有一支 agent process 收集每個節點上的 log 。執得注意的是，倘若 logging system 也是依賴於 Kubernetes 環境，而 Kubernetes 無法正常運作時，logging system 也可能癱瘓，需要注意環境相依性及單點故障。</p><figure class="kg-card kg-image-card"><img src="/content/images/2022/03/image-12.png" class="kg-image" alt loading="lazy" width="500" height="350"></figure><h4 id="using-a-sidecar-container-with-the-logging-agent">Using a sidecar container with the logging agent</h4><ul><li>Streaming sidecar container：一般來說，Container log 將 stdout 及 stderr 輸出於 Container run time 預設目錄，但是有些 application 可能預設並不會輸出至 stdout 或 stderr。如部分老舊系統有固定產出的目錄位置，則可以透過 sidecar container 搭配使用 tail 命令定期讀取該目錄位置，並由 logging agent 收集 log 回 logging system。</li></ul><figure class="kg-card kg-image-card"><img src="/content/images/2022/03/image-13.png" class="kg-image" alt loading="lazy" width="500" height="400"></figure><ul><li>Sidecar container with a logging agent ：直接透過 sidecar container 收集 application 回 logging system。例如：倘若僅需要收集特殊 application log，可以自行撰寫 script 或是 HTTP API 將 log 更新至 logging system。</li></ul><figure class="kg-card kg-image-card"><img src="/content/images/2022/03/image-16.png" class="kg-image" alt loading="lazy" width="500" height="250"></figure><ul><li>Exposing logs directly from the application：直接將透過 logging system 收集 log。</li></ul><figure class="kg-card kg-image-card"><img src="/content/images/2022/03/image-17.png" class="kg-image" alt loading="lazy" width="500" height="150"></figure><h2 id="why-we-collects-logs-from-varlogcontainers-directory">Why we collects logs from <code>/var/log/containers/</code> directory</h2><p>那到底這些 Logging system 本質上是怎麼於節點上採集 application log 呢？</p><p>以下以 EKS 官方 <a href="https://github.com/aws-samples/amazon-cloudwatch-container-insights/tree/master/k8s-deployment-manifest-templates/deployment-mode/daemonset/container-insights-monitoring">CloudWatch Agent for Container Insights Kubernetes Monitoring</a> 解決方案為例，提供了 <a href="https://www.fluentd.org/">Flutend</a> 及 Fluent Bit 兩種 Logging system。</p><p>有趣的是，這兩種不同的 Logging system 卻同時收集了相同 <code>/var/log/containers/*.log</code> 目錄作為 application log，預設 config 分別如下方所示：</p><h3 id="flutend">Flutend </h3><p>預設 Flutend <a href="https://github.com/aws-samples/amazon-cloudwatch-container-insights/blob/master/k8s-deployment-manifest-templates/deployment-mode/daemonset/container-insights-monitoring/fluentd/fluentd.yaml#L68">containers.conf </a> 收集 <code>/var/log/containers/*.log</code></p><pre><code>  containers.conf: |
+    &lt;source&gt;
+      @type tail
+      @id in_tail_container_logs
+      @label @containers
+      path /var/log/containers/*.log
+      exclude_path ["/var/log/containers/cloudwatch-agent*", "/var/log/containers/fluentd*"]
+      pos_file /var/log/fluentd-containers.log.pos
+      tag *
+      read_from_head true
+      &lt;parse&gt;
+        @type json
+        time_format %Y-%m-%dT%H:%M:%S.%NZ
+      &lt;/parse&gt;
+    &lt;/source&gt;
+    ...
+    ...
+</code></pre><h3 id="fluent-bit">Fluent Bit</h3><p>預設 Fluent Bit <a href="https://github.com/aws-samples/amazon-cloudwatch-container-insights/blob/master/k8s-deployment-manifest-templates/deployment-mode/daemonset/container-insights-monitoring/fluent-bit/fluent-bit.yaml#L62-L78">application-log.conf</a>  收集 <code>/var/log/containers/*.log</code></p><pre><code>  application-log.conf: |
+    [INPUT]
+        Name                tail
+        Tag                 application.*
+        Exclude_Path        /var/log/containers/cloudwatch-agent*, /var/log/containers/fluent-bit*, /var/log/containers/aws-node*, /var/log/containers/kube-proxy*
+        Path                /var/log/containers/*.log
+        Docker_Mode         On
+        Docker_Mode_Flush   5
+        Docker_Mode_Parser  container_firstline
+        Parser              docker
+        DB                  /var/fluent-bit/state/flb_container.db
+        Mem_Buf_Limit       50MB
+        Skip_Long_Lines     On
+        Refresh_Interval    10
+        Rotate_Wait         30
+        storage.type        filesystem
+        Read_from_Head      ${READ_FROM_HEAD}
+        ...</code></pre><blockquote class="kg-blockquote-alt">難道 Kubernetes cluster 本就會將 container log 輸出至 <code>/var/log/containers</code> 目錄嗎？</blockquote><p>根據 <a href="https://github.com/kubernetes/design-proposals-archive/blob/main/node/kubelet-cri-logging.md">Kubernetes Proposals</a>，明確定義 Pod 是基於 cluster-level 收集 log 目的導向，都會 kubelet 透過 soft link 方式關聯 Container Runtime（如 Docker）至 <code>/var/log/containers</code> 目錄，並且依照 <code>/var/log/containers/&lt;pod_name&gt;_&lt;pod_namespace&gt;_&lt;container_name&gt;-&lt;container_id&gt;.log</code> 格式作為 log 名稱。</p><pre><code>In a production cluster, logs are usually collected, aggregated, and shipped to a remote store where advanced analysis/search/archiving functions are supported. In kubernetes, the default cluster-addons includes a per-node log collection daemon, `fluentd`. To facilitate the log collection, kubelet creates symbolic links to all the docker containers logs under `/var/log/containers` with pod and container metadata embedded in the filename.
+
+	/var/log/containers/&lt;pod_name&gt;_&lt;pod_namespace&gt;_&lt;container_name&gt;-&lt;container_id&gt;.log`
+
+The fluentd daemon watches the `/var/log/containers/` directory and extract the metadata associated with the log from the path. Note that this integration requires kubelet to know where the container runtime stores the logs, and will not be directly applicable to CRI.
+</code></pre><blockquote>附註：Kubernetes Proposals <a href="https://www.cncf.io/blog/2021/04/12/enhancing-the-kubernetes-enhancements-process/">從 2021 4 月</a>起已經將相關 Proposal 遷移至 <a href="https://github.com/kubernetes" rel="author">kubernetes</a>/<a href="https://github.com/kubernetes/enhancements"><strong>enhancements</strong></a><strong> GitHub。</strong></blockquote><h2 id="summary">Summary</h2><p>故現況 Kubernetes - Cluster-level Using a node logging agent 架構，皆是收集 <code>/var/log/contianers</code> 目錄 log 作為一個 Kubernetes 收集 container application log 的共用規範。</p><h2 id="%E5%8F%83%E8%80%83%E6%96%87%E4%BB%B6">參考文件</h2><ol><li><a href="https://kubernetes.io/docs/concepts/cluster-administration/logging/">https://kubernetes.io/docs/concepts/cluster-administration/logging/</a></li><li><a href="https://github.com/kubernetes/design-proposals-archive/blob/main/node/kubelet-cri-logging.md">https://github.com/kubernetes/design-proposals-archive/blob/main/node/kubelet-cri-logging.md</a></li></ol>

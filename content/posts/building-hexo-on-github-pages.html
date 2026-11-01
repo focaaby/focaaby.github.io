@@ -1,0 +1,37 @@
+---
+title: "Building Hexo on GitHub Pages"
+slug: "building-hexo-on-github-pages"
+date: "2017-05-11T08:00:00+08:00"
+lastmod: "2021-10-11T07:26:18+08:00"
+draft: false
+tags: ["github", "hexo"]
+authors: ["focaaby"]
+featured: false
+excerpt: "前言\n其實這篇教學應該要比先前兩篇早時間出來，才不會導致不小心誤用 hexo deploy 導致原先在 GitHub 的 source 直接被覆蓋 QQ\n\nHexo 簡介\n在 Github Pages 原生支援 Jekyll [https://jekyllrb.com/] 靜態頁面當作你的首頁或是部落格，而 Hexo\n[https://hexo.io/] 也是一個支援 Markdown 格式且一鍵部屬產生靜態網站的框架，底層架構則是使用\nNodejs，最最最重要的是，作者還是台灣人唷！！\n\nHexo 安裝 && 套用 Theme\n在首頁就可以看到基本的安裝指令如下：\n\nnpm install hexo-cli -g\nhexo init blog\ncd blog"
+description: "前言\n其實這篇教學應該要比先前兩篇早時間出來，才不會導致不小心誤用 hexo deploy 導致原先在 GitHub 的 source 直接被覆蓋 QQ\n\nHexo 簡介\n在 Github Pages 原生支援 Jekyll [https://jekyllrb.com/] 靜態頁面當作你的首頁或是部落格，而 Hexo\n[https://hexo.io/] 也是一個支援 Markdown 格式且一鍵部屬產生靜態網站的框架，底層架構則是使用\nNodejs，最最最重要的是，作者還是台灣人唷！！\n\nHexo 安裝 && 套用 Theme\n在首頁就可以看到基本的安裝指令如下：\n\nnpm install hexo-cli -g\nhexo init blog\ncd blog"
+reading_time: "3 min read"
+---
+<h2 id="%E5%89%8D%E8%A8%80">前言</h2><p>其實這篇教學應該要比先前兩篇早時間出來，才不會導致不小心誤用 <code>hexo deploy</code> 導致原先在 GitHub 的 source 直接被覆蓋 QQ</p><h3 id="hexo-%E7%B0%A1%E4%BB%8B">Hexo 簡介</h3><p>在 Github Pages 原生支援 <a href="https://jekyllrb.com/">Jekyll</a> 靜態頁面當作你的首頁或是部落格，而 <a href="https://hexo.io/">Hexo</a> 也是一個支援 Markdown 格式且一鍵部屬產生靜態網站的框架，底層架構則是使用 Nodejs，最最最重要的是，作者還是台灣人唷！！</p><h3 id="hexo-%E5%AE%89%E8%A3%9D-%E5%A5%97%E7%94%A8-theme">Hexo 安裝 &amp;&amp; 套用 Theme</h3><p>在首頁就可以看到基本的安裝指令如下：</p><pre><code class="language-bash">npm install hexo-cli -g
+hexo init blog
+cd blog
+npm install
+hexo server
+</code></pre><p>在這邊我選擇的主題是 <a href="https://github.com/CodeDaraW/Hacker">Hacker</a>，在這邊先將全域設定檔 <code>_config.yml</code> 修改主題</p><pre><code>theme: Hacker
+</code></pre><p>接著，將 Hacker 主題 clone 或是直接 download 至 <code>themes</code> 路徑，並設定主題設定檔 <code>_config.yml</code> 筆者在這邊已經先申請好 <a href="https://disqus.com/">Disqus</a> 當作留言回覆，以及 <a href="https://www.google.com/analytics/">Google Analytics</a> ID 了</p><pre><code class="language-yaml"># duoshuo comment
+duoshuo: false
+duoshuo_name:
+
+# disqus comment
+disqus: true
+disqus_shortname:
+
+# google analytics
+googleTrackId:
+</code></pre><h3 id="hexo-%E6%8C%87%E4%BB%A4-%E8%B3%87%E7%94%A2%E8%B3%87%E6%96%99%E5%A4%BE">Hexo 指令 &amp;&amp; 資產資料夾</h3><h4 id="%E6%96%B0%E5%A2%9E%E6%96%87%E7%AB%A0">新增文章</h4><p>這裡 layout 預設有 <code>draft</code>，<code>page</code>，<code>post</code>三種，可自行新增 layout</p><pre><code class="language-bash">hexo new [layout] &lt;title&gt;
+</code></pre><h4 id="%E8%B3%87%E7%94%A2%E8%B3%87%E6%96%99%E5%A4%BE">資產資料夾</h4><p>由於筆者會附上一些操作的截圖，Hexo 這邊提供了相關套件可以使用 <code>hexo-asset-image</code></p><pre><code class="language-bash">npm install hexo-asset-image // or yarn add hexo-asset-image
+</code></pre><p>安裝完套件以後，可以在全域設定檔 <code>_config.yml</code> 修改資產設定：</p><pre><code class="language-yaml">post_asset_folder: true
+</code></pre><p>設定完之後，在每次新增文章時，每一個文章名稱都會有一個同樣命名的資料夾路徑，便可以將該文章需要放置的 image、css、js 等檔案放置該目錄。</p><pre><code>├── Windows-10-ubuntu-16-04-in-Acer-Swift-5
+│   ├── cmd.jpg
+│   └── swift5.jpg
+└── Windows-10-ubuntu-16-04-in-Acer-Swift-5.md
+</code></pre><h3 id="hexo-%E9%83%A8%E5%B1%AC">Hexo 部屬</h3><p>在這個步驟中有一些觀念要先釐清：</p><ol><li>在 GitHub Pages 中，若是以個人帳號為主的部落格，則必須使用 branch 為 <code>master</code> 來放置你的靜態網頁內容。也就是說你需要額外多開一個 branch 來放置 Hexo source 。</li><li><code>hexo-deployer-git</code> 套件的運作方式，會先產生 <code>.deploy_git</code> 的路徑並 <code>force pushing</code> [註 3] 到設定檔對應的 branch 上面，若是沒有 <code>.deploy_git</code> 的話則會將該 branch 重新初始（<code>git init</code>）。</li></ol><p>在撰寫此篇之前，我並未充分理解運作原理，錯誤將 source push 到 master 當作備份，同時也將部屬 branch 設定韋 master，於是造成了原先 source 被覆蓋的悲劇...</p><h2 id="%E5%BE%8C%E8%A8%98">後記</h2><p>好險當初<s>耍笨</s>時資料是在研究室 PC ，另外有備份存放於筆電，只需要將 Markdown 重新撰寫一下即可。 Git 真的不要隨便用 <code>force</code> 呀... 真的是會後悔的 QQ</p><h2 id="reference">Reference</h2><ol><li><a href="https://hexo.io/">Hexo 官網及文件</a></li><li><a href="https://github.com/hexojs/hexo-deployer-git#how-it-works">hexo-deployer-git 運作模式</a></li><li><a href="https://zlargon.gitbooks.io/git-tutorial/content/remote/force_update.html">強制更新遠端分支</a></li></ol>

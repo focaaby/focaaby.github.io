@@ -1,0 +1,143 @@
+---
+title: "How OpsWorks mount EBS Volume automatically"
+slug: "how-opsworks-mount-ebs-volume-automatically"
+date: "2022-01-08T19:30:00+08:00"
+lastmod: "2022-01-24T04:46:43+08:00"
+draft: false
+tags: ["opsworks", "ebs", "aws", "mount", "linux", "cloud-init"]
+authors: ["focaaby"]
+featured: false
+custom_excerpt: "The ephemeral device mount points are mounted by the cloud-init module and the EBS volumes are mounted by the default OpsWorks recipe aws_opsworks_ebs. In this article, we will know how OpsWorks mount the EBS volumes."
+excerpt: "The ephemeral device mount points are mounted by the cloud-init module and the EBS volumes are mounted by the default OpsWorks recipe aws_opsworks_ebs. In this article, we will know how OpsWorks mount the EBS volumes."
+description: "The ephemeral device mount points are mount by cloud-ini module and the EBS volumes are mount by the default OpsWorks recipe aws_opsworks_ebs. In this article, we will know how OpsWorks mount the EBS volumes."
+feature_image: "https://images.unsplash.com/photo-1495546968767-f0573cca821e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwxMTc3M3wwfDF8c2VhcmNofDh8fHJlY2lwZXxlbnwwfHx8fDE2NDI5NzA3MjM&ixlib=rb-1.2.1&q=80&w=2000"
+feature_image_caption: "Photo by <a href=\"https://unsplash.com/@danielcgold?utm_source=ghost&utm_medium=referral&utm_campaign=api-credit\">Dan Gold</a> / <a href=\"https://unsplash.com/?utm_source=ghost&utm_medium=referral&utm_campaign=api-credit\">Unsplash</a>"
+reading_time: "4 min read"
+---
+<!--kg-card-begin: markdown--><ol>
+<li>Add an Additional EBS Volumes with OpsWorks Layer's configuration.</li>
+</ol>
+<pre><code class="language-json">$ aws opsworks --region us-west-2 describe-layers --stack-id 433a1bd3-699d-4306-9533-b44530293ab5 --query 'Layers[*].VolumeConfigurations'
+
+
+[
+    [
+        {
+            &quot;MountPoint&quot;: &quot;/mnt/workspace&quot;,
+            &quot;NumberOfDisks&quot;: 1,
+            &quot;Size&quot;: 10,
+            &quot;VolumeType&quot;: &quot;gp2&quot;,
+            &quot;Encrypted&quot;: false
+        }
+    ]
+]
+</code></pre>
+<ol start="2">
+<li>Add SSH key with Stack configuration. So, we can access the instance via SSH.</li>
+<li>Access to the OpsWorks instance. I can view the EBS is mounted on <code>/mnt/workspace</code>.</li>
+</ol>
+<pre><code class="language-bash">$ mount | grep &quot;workspace&quot;
+/dev/xvdi on /mnt/workspace type xfs (rw,relatime,attr2,inode64,noquota)
+</code></pre>
+<ol start="4">
+<li>The ephemeral device ephemeral0 is mounted on <code>/media/ephemeral0</code>  by cloud-init.</li>
+</ol>
+<pre><code class="language-yaml">$ tail -n 5 /etc/cloud/cloud.cfg
+
+mounts:
+ - [ ephemeral0, /media/ephemeral0 ]
+ - [ swap, none, swap, sw, &quot;0&quot;, &quot;0&quot; ]
+# vim:syntax=yaml
+</code></pre>
+<ol start="5">
+<li>EBS volumes will be set up the current configuration in <code>/var/lib/aws/opsworks/chef/xxxxxxxxx.json</code>. After that, the default OpsWork recipes <code>aws_opsworks_ebs</code>help us to mount the volume to the configured mount points.</li>
+</ol>
+<pre><code class="language-json">$ cat /var/lib/aws/opsworks/chef/2022-01-06-10-35-28-01.json
+...
+      &quot;volumes&quot;: [
+        {
+          &quot;name&quot;: &quot;Created for nodejs-server2&quot;,
+          &quot;mount_point&quot;: &quot;/mnt/workspace&quot;,
+          &quot;device&quot;: &quot;/dev/sdi&quot;,
+          &quot;volume_id&quot;: &quot;vol-032b79ca4f686b2ee&quot;
+        }
+      ]
+    },
+</code></pre>
+<pre><code class="language-bash">$ cat /var/lib/aws/opsworks/chef/2022-01-06-10-33-35-01.log
+...
+[2022-01-06T10:33:51+00:00] INFO: Processing ruby_block[delete_lines_from_fstab] action run (aws_opsworks_ebs::default line 1)
+[2022-01-06T10:33:51+00:00] INFO: ruby_block[delete_lines_from_fstab] called
+[2022-01-06T10:33:51+00:00] INFO: Processing yum_package[xfsprogs] action install (aws_opsworks_ebs::default line 9)
+[2022-01-06T10:33:51+00:00] INFO: Processing ruby_block[add xfs to list of known filesystems] action run (aws_opsworks_ebs::default line 16)
+[2022-01-06T10:33:51+00:00] INFO: ruby_block[add xfs to list of known filesystems] called
+[2022-01-06T10:33:51+00:00] INFO: Processing apt_repository[add_required_repository_for_nvme-cli_for_ubuntu-14.04] action add (aws_opsworks_ebs::default line 23)
+[2022-01-06T10:33:51+00:00] INFO: Processing yum_package[nvme-cli] action install (aws_opsworks_ebs::default line 28)
+[2022-01-06T10:33:51+00:00] INFO: Processing ebs_volume[vol-032b79ca4f686b2ee] action mount (aws_opsworks_ebs::default line 44)
+[2022-01-06T10:33:51+00:00] INFO: Processing execute[mkfs /dev/xvdi] action run (/var/lib/aws/opsworks/cache.internal/cookbooks/aws_opsworks_ebs/resources/ebs_volume.rb line 15)
+[2022-01-06T10:33:52+00:00] INFO: execute[mkfs /dev/xvdi] ran successfully
+[2022-01-06T10:33:52+00:00] INFO: Processing directory[/mnt/workspace] action create (/var/lib/aws/opsworks/cache.internal/cookbooks/aws_opsworks_ebs/resources/ebs_volume.rb line 29)
+[2022-01-06T10:33:52+00:00] INFO: directory[/mnt/workspace] created directory /mnt/workspace
+[2022-01-06T10:33:52+00:00] INFO: directory[/mnt/workspace] mode changed to 755
+[2022-01-06T10:33:52+00:00] INFO: Processing ruby_block[delete existing fstab entries for this mount point and device] action run (/var/lib/aws/opsworks/cache.internal/cookbooks/aws_opsworks_ebs/resources/ebs_volume.rb line 35)
+[2022-01-06T10:33:52+00:00] INFO: ruby_block[delete existing fstab entries for this mount point and device] called
+[2022-01-06T10:33:52+00:00] INFO: Processing mount[/mnt/workspace] action mount (/var/lib/aws/opsworks/cache.internal/cookbooks/aws_opsworks_ebs/resources/ebs_volume.rb line 44)
+[2022-01-06T10:33:52+00:00] INFO: mount[/mnt/workspace] mounted
+[2022-01-06T10:33:52+00:00] INFO: Processing mount[/mnt/workspace] action enable (/var/lib/aws/opsworks/cache.internal/cookbooks/aws_opsworks_ebs/resources/ebs_volume.rb line 44)
+[2022-01-06T10:33:52+00:00] INFO: mount[/mnt/workspace] enabled
+...
+</code></pre>
+<p>The following is default <code>aws_opsworks_ebs</code> recipe.</p>
+<pre><code class="language-ruby">$ cat /opt/aws/opsworks/current/cookbooks/aws_opsworks_ebs/recipes/default.rb
+ruby_block &quot;delete_lines_from_fstab&quot; do
+  block do
+    file = Chef::Util::FileEdit.new(&quot;/etc/fstab&quot;)
+    file.search_file_delete_line(&quot;/dev/nvme&quot;)
+    file.write_file
+  end
+end
+
+package &quot;xfsprogs&quot; do
+  # RedHat 6 does not provide xfsprogs
+  not_if { rhel6? }
+  retries 2
+end
+
+# add xfs to list of known filesystems
+ruby_block &quot;add xfs to list of known filesystems&quot; do
+  block do
+    Filesystems.add_xfs_to_known_filesystems
+  end
+  only_if { ::File.exist?(&quot;/etc/filesystems&quot;) &amp;&amp; node[&quot;aws_opsworks_agent&quot;][&quot;resources&quot;][&quot;volumes&quot;].size &gt; 0 }
+end
+
+apt_repository 'add_required_repository_for_nvme-cli_for_ubuntu-14.04' do
+  only_if { EbsVolumeHelpers.nvme_based? &amp;&amp; !EbsVolumeHelpers.has_ebs_tooling? &amp;&amp; platform?(&quot;ubuntu&quot;) &amp;&amp; node[:platform_version] == &quot;14.04&quot; &amp;&amp; node[&quot;aws_opsworks_agent&quot;][&quot;resources&quot;][&quot;volumes&quot;].size &gt; 0 }
+  uri 'ppa:sbates'
+end
+
+package &quot;nvme-cli&quot; do
+  only_if { EbsVolumeHelpers.nvme_based? &amp;&amp; !EbsVolumeHelpers.has_ebs_tooling? &amp;&amp; !rhel6? &amp;&amp; node[&quot;aws_opsworks_agent&quot;][&quot;resources&quot;][&quot;volumes&quot;].size &gt; 0 }
+  retries 2
+end
+
+node[&quot;aws_opsworks_agent&quot;][&quot;resources&quot;][&quot;volumes&quot;].each do |volume|
+  if rhel6?
+    log &quot;skipping volume #{volume[&quot;device&quot;]} - no EBS volume support for Red Hat Enterprise Linux 6&quot;
+    next
+  end
+
+  if volume[&quot;mount_point&quot;].nil? || volume[&quot;mount_point&quot;].empty?
+    log &quot;skip mounting volume #{volume[&quot;device&quot;]} (#{volume[&quot;volume_id&quot;]}) because no mount_point specified&quot;
+    next
+  end
+
+  ebs_volume volume[&quot;volume_id&quot;] do
+    mount_point volume[&quot;mount_point&quot;]
+    volume_id volume[&quot;volume_id&quot;]
+    device volume[&quot;device&quot;]
+    fstype volume[&quot;fstype&quot;] || &quot;xfs&quot;
+  end
+end
+</code></pre>
+<!--kg-card-end: markdown--><h2 id="references">References</h2><ol><li>Editing an OpsWorks Layer's Configuration - EBS Volumes - <a href="https://docs.aws.amazon.com/opsworks/latest/userguide/workinglayers-basics-edit.html#workinglayers-basics-edit-ebs">https://docs.aws.amazon.com/opsworks/latest/userguide/workinglayers-basics-edit.html#workinglayers-basics-edit-ebs</a></li></ol>

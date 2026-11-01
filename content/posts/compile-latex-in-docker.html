@@ -1,0 +1,76 @@
+---
+title: "Compile Latex in Docker"
+slug: "compile-latex-in-docker"
+date: "2018-05-20T08:00:00+08:00"
+lastmod: "2021-10-11T06:27:18+08:00"
+draft: false
+tags: ["latex", "docker"]
+authors: ["focaaby"]
+featured: false
+custom_excerpt: "本文透過 latex-docker 來進行 latex 編譯"
+excerpt: "本文透過 latex-docker 來進行 latex 編譯"
+description: "本文透過 latex-docker 來進行 latex 編譯"
+reading_time: "2 min read"
+---
+<h2 id="%E5%89%8D%E8%A8%80">前言</h2><p>開始菸酒生的論文時刻，不想要陷入 Office 排版地獄，找到了幾個不錯 Latex 的排版。比較多都是成大模板，也有找到比較早年的台科模板。嘗試後，儘管第一個的模板已經將設定與內容拆的非常乾淨，但是我選擇了第二個，果然還是適合 <code>Makefile</code> 來編譯呀～</p><ul><li><a href="https://github.com/wengan-li/ncku-thesis-template-latex">台灣國立成功大學碩博士用畢業論文 LaTex 模版</a></li><li><a href="https://github.com/lycsjm/nckuthesis">NCKU-thesis</a></li><li><a href="https://code.google.com/archive/p/ntust-thesis/">台灣科技大學碩博士論文 Latex 模板</a></li></ul><h2 id="%E7%82%BA%E4%BB%80%E9%BA%BC%E4%B8%8D%E7%94%A8%E5%8E%9F%E7%94%9F-texlive">為什麼不用原生 Texlive</h2><p>在 Linux 環境上，可以直接透過套件管理來安裝 Texlive 相關來源：</p><pre><code class="language-bash">// Ubuntu/Debian
+sudo apt install texlive-full
+</code></pre><p>但是於 macOS 上需要安裝 <a href="http://www.tug.org/mactex/">MacTeX</a>，但是不像 Linux 環境上，相關 TeX 相關套件會自動幫你安裝好，需要逐一安裝。</p><p>因此使用 docker 便可以自己選擇套件，也可以跨平台編譯檔案。</p><h2 id="%E5%8B%95%E6%89%8B%E5%81%9A">動手做</h2><p>本來想要自己來寫一個 Dockerfile，不過 GitHub 上面也有人寫好的 <a href="https://github.com/blang/latex-docker">latex-docker</a>。</p><p>作者也整理好了三個 tag，分別是</p><ul><li>blang/latex:ubuntu (:latest) - Dockerfile.ubuntu Ubuntu TexLive distribution: Old but stable, most needed package: texlive-full (3.9GB)</li><li>blang/latex:ctanbasic - Dockerfile.basic CTAN TexLive Scheme-basic: Up-to-date, only basic packages, base for custom builds (500MB)</li><li>blang/latex:ctanfull - Dockerfile.full CTAN TexLive Scheme-full: Up-to-date, all packages (5.6GB)</li></ul><p>以下先以 <code>ctanfull</code> 也就是 TexLive 完整套件的來進行示範：</p><p>下載編譯指令</p><pre><code class="language-bash">wget https://raw.githubusercontent.com/blang/latex-docker/master/latexdockercmd.sh
+chmod +x latexdockercmd.sh
+</code></pre><p>並修改 <code>latexdockercmd.sh</code> tag 為 <code>ctanfull</code>，如下</p><pre><code class="language-sh">#!/bin/sh
+IMAGE=blang/latex:ctanfull
+exec docker run --rm -i --user="$(id -u):$(id -g)" --net=none -v "$PWD":/data "$IMAGE" "$@"
+</code></pre><p>因此我們可直接編譯</p><pre><code class="language-bash">./latexdockercmd.sh /bin/sh -c "make"
+</code></pre><h2 id="%E5%95%8F%E9%A1%8C">問題</h2><p>由於論文會使用中文字體，如標楷體，但是問題是在 container 裡面沒有該字體。而我所解決方式就是，將字體檔案也放置於專案目錄底下，再透過 <code>\fontspec</code> 設定讀取目錄字體檔案。</p><pre><code class="language-bash">.
+├── Makefile
+├── README.md
+├── backpages                     // 處理參考文獻、附錄、封底
+│   ├── appendices
+│   ├── my_appendix.tex
+│   ├── my_vita.tex
+│   └── ntust_backpages.tex
+├── chinese_trans.tex
+├── code
+│   └── logstash.conf
+├── common_env.tex
+├── example                      // 原作者範例
+│   ├── example_body.tex
+│   ├── example_fig.bb
+│   ├── example_fig.png
+│   └── example_prog_list.m
+├── figures                      // 附圖
+│   ├── dyna_rm.eps
+│   ├── infra-picture.png
+│   ├── infra.png
+│   ├── seq-admin-get-dashboard.png
+│   ├── seq-store-data.png
+│   ├── syslog.png
+│   ├── system-arch.png
+│   └── system-phase.png
+├── fonts                        // 使用到的字體
+│   ├── BiauKai.ttf
+│   ├── Times-Bold.ttf
+│   ├── Times-BoldItalic.ttf
+│   ├── Times-Italic.ttf
+│   └── Times.ttf
+├── frontpages                   // 封面、摘要、誌謝及圖表目錄等
+│   ├── my_ackn.tex
+│   ├── my_cabstract.tex
+│   ├── my_eabstract.tex
+│   ├── my_names.tex
+│   ├── my_symbols.tex
+│   ├── ntust_frontpages.tex
+│   └── ntust_logo.pdf
+├── latexdockercmd.sh            // Docker 指令腳本
+├── ntust_report.cls
+├── reference.bib
+├── sections                     // 內文
+│   ├── 01.introduction.tex
+│   ├── 02.related_work_background.tex
+│   ├── 03.system_architecture.tex
+│   ├── 04.system_implementation.tex
+│   └── conclusion.tex
+├── slashbox.sty
+├── thesis.tex                   // 主設定及使用套件
+└── watermark
+    ├── ntust_logo.pdf
+    └── ntust_watermark.tex</code></pre>

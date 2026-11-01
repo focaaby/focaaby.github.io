@@ -1,0 +1,71 @@
+---
+title: "Automatically validating the multiple SAN through DNS validation within multiple hosted zone by using CloudFormation template"
+slug: "automatically-validating-the-multiple-san-through-dns-validation-within-multiple-hosted-zone-by-using-cloudformation-template"
+date: "2021-05-18T08:00:00+08:00"
+lastmod: "2022-01-07T05:32:30+08:00"
+draft: false
+tags: ["cloudformation", "r53", "acm", "aws"]
+authors: ["focaaby"]
+featured: false
+custom_excerpt: "ACM support automatically renews DNS-validated certificates. This article will go through how to request a public certificate with multiple SAN, which included the domain name in a public hosted zone and a private hosted zone."
+excerpt: "ACM support automatically renews DNS-validated certificates. This article will go through how to request a public certificate with multiple SAN, which included the domain name in a public hosted zone and a private hosted zone."
+description: "ACM support automatically renews DNS-validated certificates. This article will go through how to request a public certificate with multiple SAN, which included the domain name in a public hosted zone and a private hosted zone."
+reading_time: "1 min read"
+---
+<h2 id="summary">Summary</h2><p>ACM support automatically renews DNS-validated certificates[1]. In this article will go through how to request a public certificate with multiple Subject Alternative Names(SAN)[2], which included the domain name in a public hosted zone and a private hosted zone.</p><h2 id="steps">Steps</h2><!--kg-card-begin: markdown--><ol>
+<li>
+<p>Create a public hosted zone, and record the hosted zone id.</p>
+</li>
+<li>
+<p>Create a CloudFormation template with following YAML file.</p>
+<pre><code class="language-yaml">---
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Test
+Resources:
+  MyPrivateHostedZone:
+    Type: AWS::Route53::HostedZone
+    Properties:
+      Name: dev.example.com
+      VPCs:
+      - VPCId: vpc-000e0266
+        VPCRegion: eu-west-1
+  MyCertificate:
+    Type: AWS::CertificateManager::Certificate
+    Properties:
+      DomainName: &quot;*.example.com&quot;
+      DomainValidationOptions:
+      - DomainName: example.com
+        HostedZoneId: ZZYK0LLL1NN1XX
+      - DomainName: &quot;*.dev.example.com&quot;
+        HostedZoneId: !Ref MyPrivateHostedZone
+      SubjectAlternativeNames:
+      - &quot;*.dev.example.com&quot;
+      - &quot;*.example.com&quot;
+      ValidationMethod: DNS
+</code></pre>
+</li>
+<li>
+<p>Create the the CloudFormation stack.</p>
+</li>
+<li>
+<p>During the certificate is creating, ACM will create the both CNAME in the hosted zone that specific in CloudFormation template.</p>
+<pre><code class="language-bash">$ aws cloudformation describe-stack-events --stack-name my53-certificate
+...
+{
+    &quot;StackId&quot;: &quot;arn:aws:cloudformation:eu-west-1:111222333444:stack/ttttteeset/eb245330-b821-11eb-89af-061b29697291&quot;,
+    &quot;EventId&quot;: &quot;MyCertificate-0820989e-77e7-480e-8f57-2b3aaf3d59f4&quot;,
+    &quot;StackName&quot;: &quot;my53-certificate&quot;,
+    &quot;LogicalResourceId&quot;: &quot;MyCertificate&quot;,
+    &quot;PhysicalResourceId&quot;: &quot;&quot;,
+    &quot;ResourceType&quot;: &quot;AWS::CertificateManager::Certificate&quot;,
+    &quot;Timestamp&quot;: &quot;2021-05-18T21:44:15.531000+00:00&quot;,
+    &quot;ResourceStatus&quot;: &quot;CREATE_IN_PROGRESS&quot;,
+    &quot;ResourceStatusReason&quot;: &quot;Content of DNS Record is: {Name: _7758ffb3838c6cf7c3ec68de36d03fe0.example.com.,
+Type: CNAME,Value: _3402713d1c23665051ea05c1963caf81.olprtlswtu.acm-validations.aws.}&quot;,
+    &quot;ClientRequestToken&quot;: &quot;Console-CreateStack-b05e9d4a-9da0-dfe3-387c-4890b84060c2&quot;
+},
+...
+</code></pre>
+</li>
+</ol>
+<!--kg-card-end: markdown--><h2 id="wrapping-up">Wrapping up</h2><ol><li>The AWS ACM is supported DNS validation for both public and private hosted zone.</li><li>We can add multiple SAN with <code>DomainValidationOptions</code>[3] in CloudFormation.</li><li>ACM will create the domain's DNS record for a validation CNAME.</li></ol><h2 id="references">References</h2><ol><li>Validating domain ownership - <a href="https://docs.aws.amazon.com/acm/latest/userguide/domain-ownership-validation.html">https://docs.aws.amazon.com/acm/latest/userguide/domain-ownership-validation.html</a></li><li>Subject Alternative Name - <a href="https://en.wikipedia.org/wiki/Subject_Alternative_Name">https://en.wikipedia.org/wiki/Subject_Alternative_Name</a></li><li>AWS::CertificateManager::Certificate DomainValidationOption - <a href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-certificatemanager-certificate-domainvalidationoption.html">https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-certificatemanager-certificate-domainvalidationoption.html</a></li></ol>
